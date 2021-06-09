@@ -121,7 +121,7 @@
                     cookieBtn:function () {
                         app.inputCookie =  $('#cookieIpt').val();
                         if (app.inputCookie.replace(/(^s*)|(s*$)/g, "").length !==0 ){
-                            this.$http.jsonp('http://192.168.2.14:8080/data', {
+                            this.$http.jsonp('http://192.168.2.10:8080/data', {
                                 params: {inputCookie : app.inputCookie},
                                 jsonp: 'callback'
                             }).then((res) => {
@@ -145,7 +145,7 @@
                     },
                 },
                 mounted() {
-                    this.$http.jsonp('http://192.168.2.14:8080/data', {
+                    this.$http.jsonp('http://192.168.2.10:8080/data', {
                         params: {},
                         jsonp: 'callback'
                     }).then((res) => {
