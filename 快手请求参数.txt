@@ -1,0 +1,138 @@
+/**关注列表**/
+{
+    "operationName": "likeDataQuery",
+    "variables": {
+        "page": "follow"
+    },
+    "query": "fragment feedContent on Feed {\n  type\n  author {\n    id\n    name\n    headerUrl\n    following\n    headerUrls {\n      url\n      __typename\n    }\n    __typename\n  }\n  photo {\n    id\n    duration\n    caption\n    likeCount\n    realLikeCount\n    coverUrl\n    photoUrl\n    coverUrls {\n      url\n      __typename\n    }\n    timestamp\n    expTag\n    animatedCoverUrl\n    distance\n    videoRatio\n    liked\n    stereoType\n    __typename\n  }\n  canAddComment\n  llsid\n  status\n  currentPcursor\n  __typename\n}\n\nfragment photoResult on PhotoResult {\n  result\n  llsid\n  expTag\n  serverExpTag\n  pcursor\n  feeds {\n    ...feedContent\n    __typename\n  }\n  webPageArea\n  __typename\n}\n\nquery likeDataQuery($pcursor: String, $page: String) {\n  likeData(pcursor: $pcursor, page: $page) {\n    ...photoResult\n    __typename\n  }\n}\n"
+}
+
+
+/**查询个人信息**/
+{
+    "operationName": "userInfoQuery",
+    "variables": {},
+    "query": "query userInfoQuery {\n  visionOwnerInfo {\n    id\n    name\n    avatar\n    eid\n    userId\n    __typename\n  }\n}\n"
+}
+
+/**查询评论**/
+{"operationName":"commentListQuery","variables":{"photoId":"3xrmv284c5hffxg","pcursor":""},"query":"query commentListQuery($photoId: String, $pcursor: String) {\n  visionCommentList(photoId: $photoId, pcursor: $pcursor) {\n    commentCount\n    pcursor\n    rootComments {\n      commentId\n      authorId\n      authorName\n      content\n      headurl\n      timestamp\n      likedCount\n      realLikedCount\n      liked\n      status\n      subCommentCount\n      subCommentsPcursor\n      subComments {\n        commentId\n        authorId\n        authorName\n        content\n        headurl\n        timestamp\n        likedCount\n        realLikedCount\n        liked\n        status\n        replyToUserName\n        replyTo\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"}
+
+
+/**查找用户**/
+{
+    "operationName": "graphqlSearchUser",
+    "variables": {
+        "keyword": "历姐"
+    },
+    "query": "query graphqlSearchUser($keyword: String, $pcursor: String, $searchSessionId: String) {\n  visionSearchUser(keyword: $keyword, pcursor: $pcursor, searchSessionId: $searchSessionId) {\n    result\n    users {\n      fansCount\n      photoCount\n      isFollowing\n      user_id\n      headurl\n      user_text\n      user_name\n      verified\n      verifiedDetail {\n        description\n        iconType\n        newVerified\n        musicCompany\n        type\n        __typename\n      }\n      __typename\n    }\n    searchSessionId\n    pcursor\n    __typename\n  }\n}\n"
+}
+
+/**查找视频**/
+{
+    "operationName": "visionSearchPhoto",
+    "variables": {
+        "keyword": "历姐",
+        "pcursor": "",
+        "page": "search"
+    },
+    "query": "query visionSearchPhoto($keyword: String, $pcursor: String, $searchSessionId: String, $page: String, $webPageArea: String) {\n  visionSearchPhoto(keyword: $keyword, pcursor: $pcursor, searchSessionId: $searchSessionId, page: $page, webPageArea: $webPageArea) {\n    result\n    llsid\n    webPageArea\n    feeds {\n      type\n      author {\n        id\n        name\n        following\n        headerUrl\n        headerUrls {\n          cdn\n          url\n          __typename\n        }\n        __typename\n      }\n      tags {\n        type\n        name\n        __typename\n      }\n      photo {\n        id\n        duration\n        caption\n        likeCount\n        realLikeCount\n        coverUrl\n        photoUrl\n        liked\n        timestamp\n        expTag\n        coverUrls {\n          cdn\n          url\n          __typename\n        }\n        photoUrls {\n          cdn\n          url\n          __typename\n        }\n        animatedCoverUrl\n        stereoType\n        videoRatio\n        __typename\n      }\n      canAddComment\n      currentPcursor\n      llsid\n      status\n      __typename\n    }\n    searchSessionId\n    pcursor\n    aladdinBanner {\n      imgUrl\n      link\n      __typename\n    }\n    __typename\n  }\n}\n"
+}
+
+
+{
+  "operationName": "visionProfilePhotoList",
+  "variables": {
+    "userId": "3x6sjd8e5nu526g",
+    "pcursor": "1.620602014181E12",
+    "page": "profile"
+  },
+  "query": "query visionProfilePhotoList($pcursor: String, $userId: String, $page: String, $webPageArea: String) {\n  visionProfilePhotoList(pcursor: $pcursor, userId: $userId, page: $page, webPageArea: $webPageArea) {\n    result\n    llsid\n    webPageArea\n    feeds {\n      type\n      author {\n        id\n        name\n        following\n        headerUrl\n        headerUrls {\n          cdn\n          url\n          __typename\n        }\n        __typename\n      }\n      tags {\n        type\n        name\n        __typename\n      }\n      photo {\n        id\n        duration\n        caption\n        likeCount\n        realLikeCount\n        coverUrl\n        coverUrls {\n          cdn\n          url\n          __typename\n        }\n        photoUrls {\n          cdn\n          url\n          __typename\n        }\n        photoUrl\n        liked\n        timestamp\n        expTag\n        animatedCoverUrl\n        stereoType\n        videoRatio\n        __typename\n      }\n      canAddComment\n      currentPcursor\n      llsid\n      status\n      __typename\n    }\n    hostName\n    pcursor\n    __typename\n  }\n}\n"
+}
+
+
+
+{
+    "operationName": "visionProfile",
+    "variables": {
+        "userId": "3x6sjd8e5nu526g"
+    },
+    "query": "query visionProfile($userId: String) {\n  visionProfile(userId: $userId) {\n    result\n    hostName\n    userProfile {\n      ownerCount {\n        fan\n        photo\n        follow\n        photo_public\n        __typename\n      }\n      profile {\n        gender\n        user_name\n        user_id\n        headurl\n        user_text\n        user_profile_bg_url\n        __typename\n      }\n      isFollowing\n      __typename\n    }\n    __typename\n  }\n}\n"
+}
+/**视频主页**/
+https://video.kuaishou.com/short-video/3xcmdyyepz5ikyw?authorId=3x6sjd8e5nu526g&streamSource=search&searchKey=%E5%8E%86%E5%A7%90&area=searchxxnull
+
+/**个人主页**/
+https://video.kuaishou.com/profile/3x6sjd8e5nu526g
+
+
+{
+  "data": {
+    "visionSearchPhoto": {
+      "result": 1,
+      "llsid": "2000439394177513026",
+      "webPageArea": "searchxxnull",
+      "feeds": [
+        {
+          "type": 1,
+          "author": {
+            "id": "3x6sjd8e5nu526g",
+            "name": "历姐🌹️🌹️🌹️",
+            "following": false,
+            "headerUrl": "https://ali2.a.yximgs.com/uhead/AB/2021/05/03/06/BMjAyMTA1MDMwNjE4MzBfNDI2MjAwNzI0XzJfaGQyOThfMjEy_s.jpg",
+            "headerUrls": null,
+            "__typename": "Author"
+          },
+          "tags": [
+            {
+              "type": 1,
+              "name": "好身材秀出来",
+              "__typename": "Tag"
+            },
+            {
+              "type": 1,
+              "name": "还有多少个十年",
+              "__typename": "Tag"
+            },
+            {
+              "type": 1,
+              "name": "感谢官方这个平台谢谢好友们的支持",
+              "__typename": "Tag"
+            }
+          ],
+          "photo": {
+            "id": "3xcmdyyepz5ikyw",
+            "duration": 11019,
+            "caption": "#好身材秀出来  #还有多少个十年 家人们早上好",
+            "likeCount": "969",
+            "realLikeCount": 969,
+            "coverUrl": "https://ali2.a.yximgs.com/upic/2021/01/30/06/BMjAyMTAxMzAwNjE1MzNfNDI2MjAwNzI0XzQzMjM1MTQ3MzQ2XzJfMw==_B8a2a7b7fda8eda89070b67af33b3a717.jpg?tag=1-1622881950-xpcwebsearch-0-8exyxsqwww-19b10183c4a811cd&clientCacheKey=3xcmdyyepz5ikyw.jpg&di=de5ba7b8&bp=10004",
+            //视频链接
+	    "photoUrl": "https://v1.kwaicdn.com/upic/2021/01/30/06/BMjAyMTAxMzAwNjE1MzNfNDI2MjAwNzI0XzQzMjM1MTQ3MzQ2XzJfMw==_b_B09c5033c79c958336a9839feaa10d2ce.mp4?pkey=AAXYA_MRjE4Ujvyq9SxiX8UttZfDKi0WjT9wDX0KLTNEmTz1UszvcJGsbzBka0zNm-Lh4ZJ76aoFXpJ2RCY_7aWRKEZ_mJxtCfu_p4a0bt52PQwMNpF2U3U4P39APJP6u-M&tag=1-1622881950-xpcwebsearch-0-az9ngt6o66-631b17d71dec8978&clientCacheKey=3xcmdyyepz5ikyw_b.mp4&tt=b&di=de5ba7b8&bp=10004",
+            "liked": false,
+            "timestamp": 1611958568026,
+            "expTag": "1_a/2000439394177513026_xpcwebsearchxxnull0",
+            "coverUrls": null,
+            "photoUrls": [
+              {
+                "cdn": "v1.kwaicdn.com",
+                "url": "https://v1.kwaicdn.com/upic/2021/01/30/06/BMjAyMTAxMzAwNjE1MzNfNDI2MjAwNzI0XzQzMjM1MTQ3MzQ2XzJfMw==_b_B09c5033c79c958336a9839feaa10d2ce.mp4?pkey=AAXYA_MRjE4Ujvyq9SxiX8UttZfDKi0WjT9wDX0KLTNEmTz1UszvcJGsbzBka0zNm-Lh4ZJ76aoFXpJ2RCY_7aWRKEZ_mJxtCfu_p4a0bt52PQwMNpF2U3U4P39APJP6u-M&tag=1-1622881950-xpcwebsearch-0-az9ngt6o66-631b17d71dec8978&clientCacheKey=3xcmdyyepz5ikyw_b.mp4&tt=b&di=de5ba7b8&bp=10004",
+                "__typename": "Url"
+              },
+              {
+                "cdn": "v3.kwaicdn.com",
+                "url": "https://v3.kwaicdn.com/upic/2021/01/30/06/BMjAyMTAxMzAwNjE1MzNfNDI2MjAwNzI0XzQzMjM1MTQ3MzQ2XzJfMw==_b_B09c5033c79c958336a9839feaa10d2ce.mp4?pkey=AAUOn1OaalRXUVS0tj2BgTUoIuD28hCvCnP4DAxNil21xovtSLv3SMncAyMcDADCU9WGmZn8LcjpQpzUz3kF3bLtx61fyS5gSqQF_6CWu0ziepSxzEKKegxqUm3seLcMsQ4&tag=1-1622881950-xpcwebsearch-1-pbgwj84bgd-ed2c652b16f71017&clientCacheKey=3xcmdyyepz5ikyw_b.mp4&tt=b&di=de5ba7b8&bp=10004",
+                "__typename": "Url"
+              }
+            ],
+            "animatedCoverUrl": "https://tx2.a.yximgs.com/upic/2021/01/30/06/BMjAyMTAxMzAwNjE1MzNfNDI2MjAwNzI0XzQzMjM1MTQ3MzQ2XzJfMw==_animatedV5_B1dcf8b0c6813d9e2cd1d37505aa45c07.webp?tag=1-1622881950-xpcwebsearch-0-tohvtlozo1-0f4317f5a2d03d73&clientCacheKey=3xcmdyyepz5ikyw_animatedV5.webp&di=de5ba7b8&bp=10004",
+            "stereoType": 0,
+            "videoRatio": 0.5625,
+            "__typename": "PhotoEntity"
+          },
+          "canAddComment": 0,
+          "currentPcursor": "",
+          "llsid": "2000439394177513026",
+          "status": 1,
+          "__typename": "Feed"
+        },
