@@ -12,7 +12,7 @@
 
 **clone到本地，只能打war包，打jar包的话写入Cookie的时候会报错，找不到配置文件的错误。**
 
-1.把**index.html**里两处this.$http.jsonp('http://<font color=#FF0000 >192.168.2.10:8080</font>/data') ip地址改成本机ip。
+1.把**index.html**里两处this.$http.jsonp('http://192.168.2.10:8080/data') ip地址改成本机ip。
 
 ```html
 this.$http.jsonp('http://192.168.2.10:8080/data', {
@@ -72,4 +72,4 @@ public class KsApplication extends SpringBootServletInitializer{
 
 5.完成上面的步骤，就到最后一步--打war包
 
-​	<font color=#FF0000 >点击idea右边的maven->crawler-kuaishou->Lifecycle->package</font>
+​	<font color=#FF0000>**点击idea右边的maven->crawler-kuaishou->Lifecycle->package**</font>
