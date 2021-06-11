@@ -1,175 +1,210 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>vue</title>
-        <!-- 引入样式 -->
-        <link rel="stylesheet" href="/element-ui/lib/theme-chalk/index.css">
-        <link href="/css/video-js.min.css" rel="stylesheet">
-        <link rel="shortcut icon" href='#'>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>vue</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="/element-ui/lib/theme-chalk/index.css">
+    <link href="/css/video-js.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href='#'>
 
-        <style>
-            #dataCol{
-                margin: 2rem;
-                height: 20rem;
-                display:inline-block;
-            }
-            #app{
-                margin: 4rem 2rem;
-            }
-            .video{
-                border: 1px solid #080808;
-                width: 20rem;
-                height: 20rem;
-            }
-            .videos{
-                display:none;
-                border: 1px solid #080808;
-       /*         position:fixed;*/
-                left:10%;
-                top:1%;
-                /*z-index:1;*/
-                width:100%;
-                height:100%;
-            }
-            .vclose {
-                position:relative;
-                /*right:20%;*/
-                top:1%;
-                border-radius:100%;
-                cursor: pointer;
-                z-index:4;
-            }
-            #inputData{
-                margin-bottom: 2px;
-            }
-            #inputUrl{
-                width: 16.5rem;
-            }
-            #cookieIpt{
-                width: 16.5rem;
-            }
-        </style>
-    </head>
-    <body style="width:100%">
-        <div id="app"  align="center">
-            <h1>我的关注</h1>
-            <br/>
-            <div id="inputData">
-                播放链接:<input type="text" id="inputUrl" />
-                <input type="button" id="playBut" value="播放" @click="liveUrlBtn()"/>
+    <style>
+        #dataCol {
+            margin: 2rem;
+            height: 20rem;
+            display: inline-block;
+        }
+
+        #app {
+            margin: 4rem 2rem;
+        }
+
+        .video {
+            border: 1px solid #080808;
+            width: 20rem;
+            height: 20rem;
+        }
+
+        .videos {
+            display: none;
+            border: 1px solid #080808;
+            /*         position:fixed;*/
+            left: 10%;
+            top: 1%;
+            /*z-index:1;*/
+            width: 100%;
+            height: 100%;
+        }
+
+        .vclose {
+            position: relative;
+            /*right:20%;*/
+            top: 1%;
+            border-radius: 100%;
+            cursor: pointer;
+            z-index: 4;
+        }
+
+        #inputData {
+            margin-bottom: 2px;
+        }
+
+        #inputUrl {
+            width: 16.5rem;
+        }
+
+        #cookieIpt {
+            width: 16.5rem;
+        }
+    </style>
+</head>
+<body style="width:100%">
+<div id="app" align="center">
+    <h1>我的关注</h1>
+    <br/>
+    <div id="inputData">
+        播放链接:<input type="text" id="inputUrl"/>
+        <input type="button" id="playBut" value="播放" @click="liveUrlBtn($event)"/>
+        <br/>
+        cookie:<input type="text" id="cookieIpt"/>
+        <input type="button" id="cookieBtn" @click="cookieBtn" value="登录"/>
+    </div>
+    <li :id="'liId'+index" v-for="(listData,index) in list" style="display:inline-block"
+        @click="liveUrlPicFun(listData.hlsPlayUrl,$event,index)">
+        <el-row :id="index" type="flex" align="center" :span="12">
+            <div id="dataCol" class="grid-content">
+                <img id="imgId" :src="listData.rtCoverUrl" height="381.5" width="231" v-loading="loading"></img>
                 <br/>
-                cookie:<input type="text" id="cookieIpt" />
-                <input type="button" id="cookieBtn" @click="cookieBtn" value="登录"/>
+                {{listData.user.user_name}}
             </div>
-            <div class="video">
-                <div class="videos" style="width: 20rem"></div><!--存放视频-->
-            </div>
-            <li v-for="(listData,items) in list" style="display:inline-block" v-loading="loading">
-                <el-row type="flex"  align="center" :span="12">
-                    <div id="dataCol" class="grid-content">
-                        <img @click="liveUrlPicFun(listData.hlsPlayUrl)" :src="listData.rtCoverUrl" height="381.5" width="231" ></img>
-                        <br/>
-                        {{listData.user.user_name}}
-                    </div>
-                </el-row>
-            </li>
-        </div>
+        </el-row>
+    </li>
+</div>
 
-        <script type="text/javascript" src="/js/vue.js"></script>
-        <!-- 引入组件库-->
-        <script type="text/javascript" src="/element-ui/lib/index.js"></script>
-        <script type="text/javascript" src="/js/vue-resource.js"></script>
-        <script type="text/javascript" src="/js/axios.js"></script>
-        <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
-        <script type="text/javascript" src="/js/flv.min.js"></script>
-        <script type="text/javascript" src="/js/video.min.js"></script>
-        <script type="text/javascript" src="js/eruda.js"></script>
+<script type="text/javascript" src="/js/vue.js"></script>
+<!-- 引入组件库-->
+<script type="text/javascript" src="/element-ui/lib/index.js"></script>
+<script type="text/javascript" src="/js/vue-resource.js"></script>
+<script type="text/javascript" src="/js/axios.js"></script>
+<script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="/js/flv.min.js"></script>
+<script type="text/javascript" src="/js/video.min.js"></script>
+<script type="text/javascript" src="js/eruda.js"></script>
 
-        <script type="text/javascript">
-            var myPlayer;
-            /*eruda.init();*/
-           var app =  new Vue({
-                el:'#app',
-                data:{
-                    list: [],
-                    loading:true,
-                    inputCookie : '',
-                    warnMsg:'',
-                },
-                methods:{
-                    /*返回顶部*/
-                    backTop:function() {
-                        document.documentElement.scrollTop = document.body.scrollTop = this.scrollTop
-                    },
-                    liveUrlPicFun:function (liveUrlFromPic) {/*z-index:2;position: absolute ;*/
-                        $('#inputUrl').val(liveUrlFromPic);
-                        $('.videos').html("<video id=\"video\" class=\"video-js vjs-default-skin\" style='height:100%;width:100%;'  preload=\"none\" controls=\"true\" autoplay=\"autoplay\"></video><img onClick=\"close2();return false;\" class=\'vclose\' src=\'pic/close.jpg\' width=\'30rem\' height=\'30rem\'/>");
-                        document.getElementById("video").innerHTML += "<source src="+liveUrlFromPic+" type=\'application\/x-mpegURL\'>";
-                        $('.videos').show();/*//视频窗口弹出*/
-                        app.$options.methods.backTop(this);
-                        videojs("video").ready(function () {
-                            myPlayer = this;
-                            myPlayer.play();
-                        });
-                    },
-                    liveUrlBtn:function () {
-                        var liveUrlFromBtn = $('#inputUrl').val();
-                        app.$options.methods.liveUrlPicFun(liveUrlFromBtn);
-                    },
-                    cookieBtn:function () {
-                        app.inputCookie =  $('#cookieIpt').val();
-                        if (app.inputCookie.replace(/(^s*)|(s*$)/g, "").length !==0 ){
-                            this.$http.jsonp('http://192.168.2.10:8080/data', {
-                                params: {inputCookie : app.inputCookie},
-                                jsonp: 'callback'
-                            }).then((res) => {
-                                if(res.data.follow == undefined || res.data.follow == null){
-                                    app.$message({
-                                        showClose: true,
-                                        message: res.bodyText,
-                                        type: 'warning',
-                                        duration:10000,
-                                    });
-                                }else {
-                                 app.list = res.data.follow;
-                                 app.list!=null?app.loading = false:app.loading = true;
-                                };
-                            }).catch(err => {
-                                console.log(err);
-                            })
-                        }else {
-                            alert("请输入正确的Cookie");
-                        }
-                    },
-                },
-                mounted() {
+<script type="text/javascript">
+    var myPlayer;
+    var app = new Vue({
+        el: '#app',
+        data: {
+            list: [],
+            loading: true,
+            inputCookie: '',
+        },
+        methods: {
+            /*返回顶部*/
+            backTop: function () {
+                document.documentElement.scrollTop = document.body.scrollTop = this.scrollTop
+            },
+            liveUrlPicFun(liveUrlFromPic, event, index) {/*z-index:2;position: absolute ;*/
+                // console.log(index,'a');
+                // console.log('event:',event);
+                // console.log('currentTarget:',event.currentTarget);
+                // console.log('currentTarget.innerHTML:',event.currentTarget.innerHTML);
+
+                //被点击的li
+                var clkLi = event.currentTarget;
+                <!--存放视频-->
+                const video = document.createElement("div");
+                video.className = 'video';
+                var appDom = event.path[4];
+                app.$options.methods.insertAfter(video, clkLi);
+                $('#inputUrl').val(liveUrlFromPic);
+                $('.video').html("<div class=\"videos\" style=\"width: 20rem\"></div>");
+                $('.videos').html("<video id=\"video\" class=\"video-js vjs-default-skin\" style='height:100%;width:100%;'  preload=\"none\" controls=\"true\" autoplay=\"autoplay\"></video><img onClick=\"close2();return false;\" class=\'vclose\' src=\'pic/close.jpg\' width=\'30rem\' height=\'30rem\'/>");
+                document.getElementById("video").innerHTML += "<source src=" + liveUrlFromPic + " type=\'application\/x-mpegURL\'>";
+                $('.videos').show();/*//视频窗口弹出*/
+                videojs("video").ready(function () {
+                    myPlayer = this;
+                    myPlayer.play();
+                });
+            },
+            liveUrlBtn(event) {
+                var liveUrlFromBtn = $('#inputUrl').val();
+                //被点击的btn
+                var clkBtn = event.currentTarget;
+                const video = document.createElement("div");
+                video.className = 'video';
+                app.$options.methods.insertAfter(video, clkBtn);
+                $('.video').html("<div class=\"videos\" style=\"width: 20rem\"></div>");
+                $('.videos').html("<video id=\"video\" class=\"video-js vjs-default-skin\" style='height:100%;width:100%;'  preload=\"none\" controls=\"true\" autoplay=\"autoplay\"></video><img onClick=\"close2();return false;\" class=\'vclose\' src=\'pic/close.jpg\' width=\'30rem\' height=\'30rem\'/>");
+                document.getElementById("video").innerHTML += "<source src=" + liveUrlFromBtn + " type=\'application\/x-mpegURL\'>";
+                $('.videos').show();/*!//视频窗口弹出*/
+                videojs("video").ready(function () {
+                    myPlayer = this;
+                    myPlayer.play();
+                });
+            },
+            insertAfter(newNode, referenceNode) {
+                referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+            },
+            cookieBtn: function () {
+                app.inputCookie = $('#cookieIpt').val();
+                if (app.inputCookie.replace(/(^s*)|(s*$)/g, "").length !== 0) {
                     this.$http.jsonp('http://192.168.2.10:8080/data', {
-                        params: {},
+                        params: {inputCookie: app.inputCookie},
                         jsonp: 'callback'
                     }).then((res) => {
-                        if(res.data.follow == undefined || res.data.follow == null){
+                        if (res.data.follow == undefined || res.data.follow == null) {
                             app.$message({
                                 showClose: true,
                                 message: res.bodyText,
                                 type: 'warning',
-                                duration:10000,
+                                duration: 10000,
                             });
-                        }else {
+                        } else {
                             app.list = res.data.follow;
-                            app.list!=null?app.loading = false:app.loading = true;
-                        };
+                            app.list != null ? app.loading = false : app.loading = true;
+                        }
+                        ;
                     }).catch(err => {
                         console.log(err);
                     })
-                },
-            });
-            function close2(){
-                $('.videos').hide();/*//点击关闭*/
-                myPlayer.dispose();/*//停止*/
-                $('.videos').html();
-            }
-        </script>
-    </body>
+                } else {
+                    alert("请输入正确的Cookie");
+                }
+            },
+
+        },
+        mounted() {
+            this.$http.jsonp('http://192.168.2.10:8080/data', {
+                params: {},
+                jsonp: 'callback'
+            }).then((res) => {
+                if (res.data.follow == undefined || res.data.follow == null) {
+                    app.$message({
+                        showClose: true,
+                        message: res.bodyText,
+                        type: 'warning',
+                        duration: 10000,
+                    });
+                } else {
+                    app.list = res.data.follow;
+                    app.list != null ? app.loading = false : app.loading = true;
+                }
+                ;
+            }).catch(err => {
+                console.log(err);
+            })
+        },
+    });
+
+    function close2() {
+        $('.videos').hide();/*//点击关闭*/
+        myPlayer.dispose();/*//停止*/
+        $('.videos').html();
+        $('.video').remove();
+    };
+</script>
+</body>
 </html>
