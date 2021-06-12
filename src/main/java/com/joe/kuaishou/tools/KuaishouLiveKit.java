@@ -158,11 +158,11 @@ public class KuaishouLiveKit {
 //            outputStream.flush();
             String originalUrl = mapData.get("originalUrl");
             String userAgent = mapData.get("userAgent");
-            String dataCookie = mapData.get("dataCookie");
+            String liveCookie = mapData.get("liveCookie");
 
             properties.setProperty("originalUrl", originalUrl);
             properties.setProperty("userAgent", userAgent);
-            properties.setProperty("dataCookie", dataCookie);
+            properties.setProperty("liveCookie", liveCookie);
             fileWriter = new FileWriter(path);
             properties.store(fileWriter, "setData");   //保存到流
             logger.info("数据写入完成：{}", mapData.toString());

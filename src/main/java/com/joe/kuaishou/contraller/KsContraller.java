@@ -25,12 +25,12 @@ public class KsContraller{
         KuaishouLiveKit kslk = new KuaishouLiveKit();
         String originalUrl = kslk.readProperties("originalUrl");
         String userAgent = kslk.readProperties("userAgent");
-        String dataCookie = kslk.readProperties("dataCookie");
+        String liveCookie = kslk.readProperties("liveCookie");
         String _cookie = "";
         if (inputCookie != null && !"".equals(inputCookie)){
             _cookie = inputCookie;
-        }else if (dataCookie != null && !"".equals(dataCookie)){
-            _cookie = dataCookie;
+        }else if (liveCookie != null && !"".equals(liveCookie)){
+            _cookie = liveCookie;
         }
         String headers = "{'User-Agent': " +"\'"+ userAgent +"\'" +",'Cookie': " + "\'"+_cookie+"\'"+"}";
         String changedUrl = "\'" + originalUrl +"\'";
@@ -43,7 +43,7 @@ public class KsContraller{
                     HashMap<String,String> dataMap = new HashMap<>();
                     dataMap.put("originalUrl",originalUrl);
                     dataMap.put("userAgent",userAgent);
-                    dataMap.put("dataCookie",inputCookie);
+                    dataMap.put("liveCookie",liveCookie);
                     kslk.writeProperties(dataMap);
                 }
                 return callback+" ("+s+")";
