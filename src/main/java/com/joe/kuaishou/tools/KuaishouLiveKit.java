@@ -24,49 +24,28 @@ public class KuaishouLiveKit {
         this.threadData = threadData;
     }
 
-    public String KsCrawlerKit(String headers, String url) {
+    private static final String winPath =  "F:\\Applications\\workSpaces\\crawler-kuaishou\\KsCrawler3.0.py";
+    private static final String linuxPath =  "/home/root/java-project/KsCrawler-2.7.py";
 
+   public String KsCrawlerKit(String headers, String url) {
         Process process = null;
         BufferedReader inputStream = null;
         BufferedReader errorStream = null;
-        StringBuffer stringBuffer = new StringBuffer();
-        StringBuffer errStringBuffer = new StringBuffer();
         try {
-            /*F:\Applications\workSpaces\joe-kuaishou1\KsCrawler3.0.py
-             * /home/root/java-project/KsCrawler-2.7.py */
-            String[] args = new String[]{"python", "F:\\Applications\\workSpaces\\crawler-kuaishou\\KsCrawler3.0.py", headers, url};
+            String[] args = new String[]{"python",winPath, headers, url};
             process = Runtime.getRuntime().exec(args);
-
-/*
-            while ((inputStr = inputStream.readLine())  != null){
-                logger.info("ksRespData={}",stringBuffer.append(inputStr).toString());
-            }*/
             InputStream inputStream1 = process.getInputStream();
             InputStream errorStream1 = process.getErrorStream();
             readStreamInfo(errorStream1, inputStream1);
             int i = process.waitFor();
             if (i == 0) {
-                logger.info("子进程正常完成");
+                logger.info("python爬虫正常完成");
             } else {
-                logger.error("子进程异常结束");
+                logger.error("python爬虫异常结束");
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
-            /*if (errorStream != null){
-                try {
-                    errorStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (inputStream != null){
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }*/
             if (process != null) {
                 process.destroy();
             }
@@ -82,7 +61,6 @@ public class KuaishouLiveKit {
      * @param inputStreams 输入流
      */
     private void readStreamInfo(InputStream... inputStreams) {
-//        new Thread(() -> {
         int i = 0;
         while (i < 1) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStreams[1]));
@@ -91,7 +69,7 @@ public class KuaishouLiveKit {
             try {
                 while ((line = bufferedReader.readLine()) != null) {
                     stringBuffer.append(line);
-                    logger.info("爬虫返回信息:{} ", line);
+                    logger.info("python爬虫返回信息:{} ", line);
                     threadData = stringBuffer.toString();
                     i = 1;
                 }
@@ -116,7 +94,7 @@ public class KuaishouLiveKit {
                     try {
                         while ((errorLine = errorBufferedReader.readLine()) != null) {
                             errorStringBuffer.append(errorLine);
-                            logger.error("爬虫错误信息:{} ", errorLine);
+                            logger.error("python爬虫返回错误信息:{} ", errorLine);
                             threadData = errorStringBuffer.toString();
                             i = 1;
                         }
@@ -137,25 +115,14 @@ public class KuaishouLiveKit {
                 }
             }
         }
-//        }).start();
     }
 
 
     public void writeProperties(HashMap<String, String> mapData) {
         String path = this.getClass().getClassLoader().getResource("ksLiveData.properties").getPath();
-//        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("ksLiveData.properties");
-//        OutputStream outputStream = new ByteArrayOutputStream();
         Properties properties = new Properties();
         FileWriter fileWriter = null;
         try {
-//            byte[] buffer = new byte[1024];
-//            int len;
-//            if (resourceAsStream != null) {
-//                while ((len = resourceAsStream.read(buffer)) != -1) { /** 将流中内容写出去 .*/
-//                    outputStream.write(buffer, 0, len);
-//                }
-//            }
-//            outputStream.flush();
             String originalUrl = mapData.get("originalUrl");
             String userAgent = mapData.get("userAgent");
             String liveCookie = mapData.get("liveCookie");
@@ -166,7 +133,6 @@ public class KuaishouLiveKit {
             fileWriter = new FileWriter(path);
             properties.store(fileWriter, "setData");   //保存到流
             logger.info("数据写入完成：{}", mapData.toString());
-            logger.info("ksLiveData.properties的路径：{}", path);
         } catch (FileNotFoundException e) {
             logger.error("数据读取失败：{}", e);
             e.printStackTrace();
@@ -185,16 +151,11 @@ public class KuaishouLiveKit {
     }
 
     public String readProperties(String key) {
-//        String path = this.getClass().getClassLoader().getResource("ksLiveData.properties").getPath();
         InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("ksLiveData.properties");
-        logger.info("ksLiveData.properties的路径：{}", resourceAsStream);
         Properties properties = new Properties();
-//        FileReader fileReader = null;
         try {
-//            fileReader = new FileReader(path);
             properties.load(resourceAsStream);    //从流读取properties文件内容
             String value = properties.getProperty(key);
-            logger.info("数据读取：{}:{}", key, value);
             return value;
         } catch (IOException e) {
             logger.error("数据读取失败：{}", e);

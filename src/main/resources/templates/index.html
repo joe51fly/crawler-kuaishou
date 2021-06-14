@@ -7,65 +7,19 @@
     <!-- 引入样式 -->
     <link rel="stylesheet" href="/element-ui/lib/theme-chalk/index.css">
     <link href="/css/video-js.min.css" rel="stylesheet">
+    <link href="/css/index.css" rel="stylesheet">
     <link rel="shortcut icon" href='#'>
 
-    <style>
-        #dataCol {
-            margin: 2rem;
-            height: 20rem;
-            display: inline-block;
-        }
-
-        #app {
-            margin: 4rem 2rem;
-        }
-
-        .video {
-            border: 1px solid #080808;
-            width: 20rem;
-            height: 20rem;
-        }
-
-        .videos {
-            display: none;
-            border: 1px solid #080808;
-            /*         position:fixed;*/
-            left: 10%;
-            top: 1%;
-            /*z-index:1;*/
-            width: 100%;
-            height: 100%;
-        }
-
-        .vclose {
-            position: relative;
-            /*right:20%;*/
-            top: 1%;
-            border-radius: 100%;
-            cursor: pointer;
-            z-index: 4;
-        }
-
-        #inputData {
-            margin-bottom: 2px;
-        }
-
-        #inputUrl {
-            width: 16.5rem;
-        }
-
-        #cookieIpt {
-            width: 16.5rem;
-        }
-    </style>
 </head>
 <body style="width:100%">
 <div id="app" align="center">
     <h1>我的关注</h1>
     <br/>
     <div id="inputData">
-        播放链接:<input type="text" id="inputUrl"/>
-        <input type="button" id="playBut" value="播放" @click="liveUrlBtn($event)"/>
+        短视频播放:<input type="text" id="playShortVidoeIpt"/>
+        <input type="button" id="playBut" value="播放" @click="playShortVideoBtn($event)"/>
+        <br/>
+        播放链接:<input type="text" id="playIpt"/>
         <br/>
         cookie:<input type="text" id="cookieIpt"/>
         <input type="button" id="cookieBtn" @click="cookieBtn" value="登录"/>
@@ -94,6 +48,7 @@
 
 <script type="text/javascript">
     var myPlayer;
+    const dataUrl = "http://192.168.2.14:8080/data";
     var app = new Vue({
         el: '#app',
         data: {
@@ -114,7 +69,7 @@
                 video.className = 'video';
                 var appDom = event.path[4];
                 app.$options.methods.insertAfter(video, clkLi);
-                $('#inputUrl').val(liveUrlFromPic);
+                $('#playIpt').val(liveUrlFromPic);
                 $('.video').html("<div class=\"videos\" style=\"width: 20rem\"></div>");
                 $('.videos').html("<video id=\"video\" class=\"video-js vjs-default-skin\" style='height:100%;width:100%;'  preload=\"none\" controls=\"true\" autoplay=\"autoplay\"></video><img onClick=\"close2();return false;\" class=\'vclose\' src=\'pic/close.jpg\' width=\'30rem\' height=\'30rem\'/>");
                 document.getElementById("video").innerHTML += "<source src=" + liveUrlFromPic + " type=\'application\/x-mpegURL\'>";
@@ -124,8 +79,8 @@
                     myPlayer.play();
                 });
             },
-            liveUrlBtn(event) {
-                var liveUrlFromBtn = $('#inputUrl').val();
+            playShortVideoBtn(event) {
+                var playShortVidoeIpt = $('#playShortVidoeIpt').val();
                 //被点击的btn
                 var clkBtn = event.currentTarget;
                 const video = document.createElement("div");
@@ -133,7 +88,7 @@
                 app.$options.methods.insertAfter(video, clkBtn);
                 $('.video').html("<div class=\"videos\" style=\"width: 20rem\"></div>");
                 $('.videos').html("<video id=\"video\" class=\"video-js vjs-default-skin\" style='height:100%;width:100%;'  preload=\"none\" controls=\"true\" autoplay=\"autoplay\"></video><img onClick=\"close2();return false;\" class=\'vclose\' src=\'pic/close.jpg\' width=\'30rem\' height=\'30rem\'/>");
-                document.getElementById("video").innerHTML += "<source src=" + liveUrlFromBtn + " type=\'application\/x-mpegURL\'>";
+                document.getElementById("video").innerHTML += "<source src=" + playShortVidoeIpt + " type=\'video\/mp4\'>";
                 $('.videos').show();/*!//视频窗口弹出*/
                 videojs("video").ready(function () {
                     myPlayer = this;
@@ -146,7 +101,7 @@
             cookieBtn: function () {
                 app.inputCookie = $('#cookieIpt').val();
                 if (app.inputCookie.replace(/(^s*)|(s*$)/g, "").length !== 0) {
-                    this.$http.jsonp('http://192.168.2.14:8080/data', {
+                    this.$http.jsonp(dataUrl, {
                         params: {inputCookie: app.inputCookie},
                         jsonp: 'callback'
                     }).then((res) => {
@@ -172,7 +127,7 @@
 
         },
         mounted() {
-            this.$http.jsonp('http://192.168.2.14:8080/data', {
+            this.$http.jsonp(dataUrl, {
                 params: {},
                 jsonp: 'callback'
             }).then((res) => {
