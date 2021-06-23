@@ -8,9 +8,6 @@
 export default {
   name: 'App',
   methods:{
-    insertAfter(newNode, referenceNode) {
-      referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
-    },
   },
 }
 </script>

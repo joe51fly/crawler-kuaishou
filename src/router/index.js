@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import Login from '../views/login'
 import Home from '../views/Home'
 // import Header from "../views/Header";
-import List from "../views/List";
+import LiveList from "../views/LiveList";
 
 Vue.use(Router)
 
@@ -19,15 +19,14 @@ export default new Router({
     {
       path: '/home',
       component: Home,
-      default:List,
       children: [
         {
-          path: 'list',
-          name:'list',
-          component: List,
+          path: 'live-list',
+          name:'live-list',
+          component: LiveList,
         },{
           path: '',
-          redirect: '/home/list'
+          redirect: '/home/live-list'
         },
       ]
     },

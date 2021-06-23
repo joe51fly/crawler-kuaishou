@@ -12,7 +12,8 @@
       <div ref="videoBox1" id="videoBox1"></div>
     </div>
 
-    <li :id="`liId+${index}`" v-for="(listData,index) in list" style="display:inline-block"
+    <li :id="`liId+${index}`" v-for="(listData,index) in list.slice(startListIndex, endListIndex)"
+        style="display:inline-block"
         :key=index ref="name">
       <el-row type="flex" align="center" :span="10" :id="`imgDiv${index}`">
         <div id="dataCol" class="grid-content">
@@ -23,11 +24,12 @@
           <span style="font-size: 1.3rem">{{listData.user.user_name}}</span>
         </div>
       </el-row>
-      <div :id="`videoDivBox${index}`" v-show="isvideoDivBoxShow" class="videoDivBoxClass"></div>
-      <div @click="closeVideoPlayer" v-show="isvideoDivBoxShow">
-        <img class='videoClose' :src="closeImgPath" width='30rem' height='30rem'/>
+      <div :id="`videoDivBox${index}`" v-show="isVideoDivBoxShow" class="videoDivBoxClass"></div>
+      <div v-show="isVideoDivBoxShow">
+        <img @click="closeVideoPlayer" class='videoClose' :src="closeImgPath" width='30rem' height='30rem'/>
       </div>
     </li>
+    <div class="hint">上拉加载，获取更多内容</div>
   </div>
 </template>
 
@@ -39,26 +41,56 @@
   export default {
     name: 'list',
     props: {
-      insertAfter: Function,
       list: Array,
     },
     data() {
       return {
-        closeImgPath:'/static/pic/close.jpg',
-        closeImgBuildPath:'/ks-vue/static/pic/close.jpg',
+        //项目打包后图片加载不到 所以给前面加上/ks-vue/
+        closeImgPath: '/static/pic/close.jpg',
+        closeImgBuildPath: '/ks-vue/static/pic/close.jpg',
+        //这个属性好像没啥用
         isLoading: true,
         inputVideoUrl: '',
+        //播放视频后把当前视频的链接设置进来
         playVideoUrl: '',
-        isvideoDivBoxShow: false,
+        //页面初始化隐藏videoboxdiv容器
+        isVideoDivBoxShow: false,
+        //上一个点击的图片的索引
         lastLiItemIdex: 0,
-        isImgShow: true
+        //播放视频时隐藏点击的图片
+        isImgShow: true,
+        //限制初始化页面的时候数据的条数
+        startListIndex: 0,
+        endListIndex: 10,
+        //防止底部一次滑动触发多次刷新的方法
+        isRefreshBool: true
       }
     },
     methods: {
-
-
-      loadErrorMessage() {
-        console.log('abc');
+      /**
+       * 监听页面滚动上拉刷新
+       */
+      loading() {
+        //变量scrollTop是滚动条滚动时，距离顶部的距离
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        //变量windowHeight是可视区的高度
+        const windowHeight = document.documentElement.clientHeight || document.body.clientHeight;
+        //变量scrollHeight是滚动条的总高度
+        const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+        //滚动条到底部的条件
+        // console.log(scrollTop + windowHeight + "--" + scrollHeight);
+        if (scrollTop + windowHeight >= scrollHeight - 20 && this.isRefreshBool) {
+          console.log('aaaaaa');
+          // false防止refresh()加载数据函数多次触发
+          this.isRefreshBool = false;
+          this.loadList();
+        }
+      },
+      loadList() {
+        setTimeout(() => {
+          this.endListIndex = this.endListIndex + 10;
+          this.isRefreshBool = true;
+        }, 500);
       },
       liveUrlPicFun(liveUrlFromPic, event, index) {
         const thisVideoDivBox = $('#videoDivBox' + index);
@@ -83,18 +115,14 @@
           lastCloseVideoDivImg.css('display', 'none');
           lastLiveImgDiv.css('display', 'block');
         }
-        const liRef = 'li' + index;
+        // const liRef = 'li' + index;
         // console.log(liRef);
         // console.log('li-ref', this.$refs.name[index]);
-        const videoBox = "<div id=\"videoDiv\" ref=\"videoBox2\"><div id=\"videoPlayer\" style=\"width: 20rem\"><video id=\"video\" :onerror='loadErrorMessage' class=\"video-js vjs-default-skin\" style='height:100%;width:100%;' preload=\"none\" controls=\"true\" autoplay=\"autoplay\"><source :src=liveUrlFromPic type='application/x-mpegURL'></video></div></div>";
+        const videoBox = "<div id=\"videoDiv\" ref=\"videoBox2\"><div id=\"videoPlayer\" style=\"width: 20rem\"><video id=\"video\" class=\"video-js vjs-default-skin\" style='height:100%;width:100%;' preload=\"none\" controls=\"true\" autoplay=\"autoplay\"><source :src=liveUrlFromPic type='application/x-mpegURL'></video></div></div>";
         // this.$refs.videoBox1.innerHTML = videoBox;
         thisVideoDivBox.css('display', 'block');
         // console.log(this.$refs.name[index].childNodes[2]);
         this.$refs.name[index].childNodes[2].innerHTML = videoBox;
-        this.$nextTick(function () {
-
-          // DOM 更新了
-        });
         // console.log('videoDiv:', $('#videoDiv'));
         // app.$options.methods.insertAfter(video, clkLi);
         $('#playIpt').val(liveUrlFromPic);
@@ -108,6 +136,7 @@
         thisLiveImgDiv.css('display', 'none');
         thisCloseVideoDivImg.css('display', 'block');
         this.lastLiItemIdex = index;
+        this.playVideoUrl = liveUrlFromPic;
       },
       inputVideoBtn(event) {
         const inputVideoUrl = $('#inputVideoId').val();
@@ -133,86 +162,26 @@
         });
       },
       closeVideoPlayer() {
-        $('#videoPlayer').hide();/*//点击关闭*/
+        $('#videoPlayer').hide();/*//隐藏视频播放器*/
         myPlayer.dispose();/*//停止*/
         $('#videoDivBox' + this.lastLiItemIdex).css('display', 'none');
-        // $('#videoDivBox' + this.lastLiItemIdex).css('zIndex', 4);
         $('#videoDivBox' + this.lastLiItemIdex + ' + div').css('display', 'none');
         this.$refs.name[this.lastLiItemIdex].childNodes[2].innerHTML = '';
         myPlayer = undefined;
         $('#imgDiv' + this.lastLiItemIdex).css('display', 'block');
       }
-
     },
     mounted() {
-      // console.log('this.$refs:',this.$refs.videoBox1.innerHTML);
-      // console.log('this.$refs:',this.$refs.videoBox1.outerHTML);
-      const _this = this;
-      // (function() {
-      //   _this.$refs.testDiv.$createElement('p', null, [
-      //     ('span', null, '内容可以是 '),
-      //     ('a', {
-      //         //普通html特性
-      //         attrs: {
-      //           href:'aTemp'
-      //         },
-      //         //相当于`v-bind:style`
-      //         style: {
-      //           color: 'red',
-      //           fontSize: '14px'},
-      //       },
-      //       '百度'
-      //     )
-      //   ]);
-      //   _this.$createElement('div', {attrs: {id: 'createDiv'}}, '<span>aaaaaa</span>');
-      //   console.log('createDiv:', $('#createDiv'));
-      // })();
-
-      // (function(){
-      //   const h = _this.$createElement;
-      //   const aTemp = 'https://www.baidu.com/?tn=98010089_dg&ch=8';
-      //   _this.$msgbox({
-      //     title: '消息',
-      //     message: h('p', null, [
-      //       h('span', null, '内容可以是 '),
-      //       h('a', {
-      //           //普通html特性
-      //           attrs: {
-      //             href:aTemp
-      //           },
-      //           //相当于`v-bind:style`
-      //           style: {
-      //             color: 'red',
-      //             fontSize: '14px'},
-      //         },
-      //         '百度'
-      //       )
-      //     ]),
-      //     showCancelButton: true,
-      //     confirmButtonText: '确定',
-      //     cancelButtonText: '取消',
-      //     beforeClose: (action, instance, done) => {
-      //       if (action === 'confirm') {
-      //         instance.confirmButtonLoading = true;
-      //         instance.confirmButtonText = '执行中...';
-      //         setTimeout(() => {
-      //           done();
-      //           setTimeout(() => {
-      //             instance.confirmButtonLoading = false;
-      //           }, 300);
-      //         }, 3000);
-      //       } else {
-      //         done();
-      //       }
-      //     }
-      //   }).then(action => {
-      //     alert('>>>>>');
-      //     _this.$message({
-      //       type: 'info',
-      //       message: 'action: ' + action
-      //     });
-      //   });
-      // })()
+      //监听页面滑动，执行this.loading函数
+      window.addEventListener('scroll', this.loading, true);
+      //页面刷新时重置this.endListIndex的值
+      window.onbeforeunload = function (e) {
+        // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
+        this.endListIndex = 10;
+      };
+    },
+    destroyed() {
+      window.removeEventListener("scroll", this.loading, true);
     },
 
   }
@@ -221,6 +190,9 @@
 </script>
 
 <style>
+  .hint{
+    margin-top: 1rem;
+  }
   .imgClass {
     height: 381.5px;
     width: 231px;
