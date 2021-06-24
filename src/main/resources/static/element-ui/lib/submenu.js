@@ -82,7 +82,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 110);
+/******/ 	return __webpack_require__(__webpack_require__.s = 129);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -189,21 +189,21 @@ function normalizeComponent (
 
 /***/ }),
 
-/***/ 110:
+/***/ 129:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 
 // EXTERNAL MODULE: external "element-ui/lib/transitions/collapse-transition"
-var collapse_transition_ = __webpack_require__(23);
+var collapse_transition_ = __webpack_require__(28);
 var collapse_transition_default = /*#__PURE__*/__webpack_require__.n(collapse_transition_);
 
 // EXTERNAL MODULE: ./packages/menu/src/menu-mixin.js
-var menu_mixin = __webpack_require__(32);
+var menu_mixin = __webpack_require__(36);
 
 // EXTERNAL MODULE: external "element-ui/lib/mixins/emitter"
-var emitter_ = __webpack_require__(3);
+var emitter_ = __webpack_require__(4);
 var emitter_default = /*#__PURE__*/__webpack_require__.n(emitter_);
 
 // EXTERNAL MODULE: external "element-ui/lib/utils/vue-popper"
@@ -389,6 +389,9 @@ var poperMixins = {
     handleMouseenter: function handleMouseenter(event) {
       var _this2 = this;
 
+      var showTimeout = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.showTimeout;
+
+
       if (!('ActiveXObject' in window) && event.type === 'focus' && !event.relatedTarget) {
         return;
       }
@@ -402,11 +405,16 @@ var poperMixins = {
       clearTimeout(this.timeout);
       this.timeout = setTimeout(function () {
         _this2.rootMenu.openMenu(_this2.index, _this2.indexPath);
-      }, this.showTimeout);
+      }, showTimeout);
+
+      if (this.appendToBody) {
+        this.$parent.$el.dispatchEvent(new MouseEvent('mouseenter'));
+      }
     },
     handleMouseleave: function handleMouseleave() {
       var _this3 = this;
 
+      var deepDispatch = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       var rootMenu = this.rootMenu;
 
       if (rootMenu.menuTrigger === 'click' && rootMenu.mode === 'horizontal' || !rootMenu.collapse && rootMenu.mode === 'vertical') {
@@ -417,6 +425,12 @@ var poperMixins = {
       this.timeout = setTimeout(function () {
         !_this3.mouseInChild && _this3.rootMenu.closeMenu(_this3.index);
       }, this.hideTimeout);
+
+      if (this.appendToBody && deepDispatch) {
+        if (this.$parent.$options.name === 'ElSubmenu') {
+          this.$parent.handleMouseleave(true);
+        }
+      }
     },
     handleTitleMouseenter: function handleTitleMouseenter() {
       if (this.mode === 'horizontal' && !this.rootMenu.backgroundColor) return;
@@ -460,6 +474,8 @@ var poperMixins = {
     this.rootMenu.removeSubmenu(this);
   },
   render: function render(h) {
+    var _this5 = this;
+
     var active = this.active,
         opened = this.opened,
         paddingStyle = this.paddingStyle,
@@ -491,9 +507,15 @@ var poperMixins = {
 
           'class': ['el-menu--' + mode, popperClass],
           on: {
-            'mouseenter': this.handleMouseenter,
-            'mouseleave': this.handleMouseleave,
-            'focus': this.handleMouseenter
+            'mouseenter': function mouseenter($event) {
+              return _this5.handleMouseenter($event, 100);
+            },
+            'mouseleave': function mouseleave() {
+              return _this5.handleMouseleave(true);
+            },
+            'focus': function focus($event) {
+              return _this5.handleMouseenter($event, 100);
+            }
           }
         },
         [h(
@@ -542,7 +564,9 @@ var poperMixins = {
         },
         on: {
           'mouseenter': this.handleMouseenter,
-          'mouseleave': this.handleMouseleave,
+          'mouseleave': function mouseleave() {
+            return _this5.handleMouseleave(false);
+          },
           'focus': this.handleMouseenter
         }
       },
@@ -604,21 +628,14 @@ submenu.install = function (Vue) {
 
 /***/ }),
 
-/***/ 23:
+/***/ 28:
 /***/ (function(module, exports) {
 
 module.exports = require("element-ui/lib/transitions/collapse-transition");
 
 /***/ }),
 
-/***/ 3:
-/***/ (function(module, exports) {
-
-module.exports = require("element-ui/lib/mixins/emitter");
-
-/***/ }),
-
-/***/ 32:
+/***/ 36:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -663,6 +680,13 @@ module.exports = require("element-ui/lib/mixins/emitter");
     }
   }
 });
+
+/***/ }),
+
+/***/ 4:
+/***/ (function(module, exports) {
+
+module.exports = require("element-ui/lib/mixins/emitter");
 
 /***/ }),
 

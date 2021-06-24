@@ -82,12 +82,12 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 114);
+/******/ 	return __webpack_require__(__webpack_require__.s = 131);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 114:
+/***/ 131:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -98,24 +98,20 @@ var vue_popper_ = __webpack_require__(5);
 var vue_popper_default = /*#__PURE__*/__webpack_require__.n(vue_popper_);
 
 // EXTERNAL MODULE: external "throttle-debounce/debounce"
-var debounce_ = __webpack_require__(14);
+var debounce_ = __webpack_require__(17);
 var debounce_default = /*#__PURE__*/__webpack_require__.n(debounce_);
 
 // EXTERNAL MODULE: external "element-ui/lib/utils/dom"
 var dom_ = __webpack_require__(2);
 
-// EXTERNAL MODULE: external "element-ui/lib/utils/vdom"
-var vdom_ = __webpack_require__(20);
-
 // EXTERNAL MODULE: external "element-ui/lib/utils/util"
-var util_ = __webpack_require__(4);
+var util_ = __webpack_require__(3);
 
 // EXTERNAL MODULE: external "vue"
-var external_vue_ = __webpack_require__(6);
+var external_vue_ = __webpack_require__(7);
 var external_vue_default = /*#__PURE__*/__webpack_require__.n(external_vue_);
 
 // CONCATENATED MODULE: ./packages/tooltip/src/main.js
-
 
 
 
@@ -166,20 +162,19 @@ var external_vue_default = /*#__PURE__*/__webpack_require__.n(external_vue_);
     hideAfter: {
       type: Number,
       default: 0
+    },
+    tabindex: {
+      type: Number,
+      default: 0
     }
   },
 
   data: function data() {
     return {
+      tooltipId: 'el-tooltip-' + Object(util_["generateId"])(),
       timeoutPending: null,
       focusing: false
     };
-  },
-
-  computed: {
-    tooltipId: function tooltipId() {
-      return 'el-tooltip-' + Object(util_["generateId"])();
-    }
   },
   beforeCreate: function beforeCreate() {
     var _this = this;
@@ -239,16 +234,13 @@ var external_vue_default = /*#__PURE__*/__webpack_require__.n(external_vue_);
       );
     }
 
-    if (!this.$slots.default || !this.$slots.default.length) return this.$slots.default;
+    var firstElement = this.getFirstElement();
+    if (!firstElement) return null;
 
-    var vnode = Object(vdom_["getFirstComponentChild"])(this.$slots.default);
+    var data = firstElement.data = firstElement.data || {};
+    data.staticClass = this.addTooltipClass(data.staticClass);
 
-    if (!vnode) return vnode;
-
-    var data = vnode.data = vnode.data || {};
-    data.staticClass = this.concatClass(data.staticClass, 'el-tooltip');
-
-    return vnode;
+    return firstElement;
   },
   mounted: function mounted() {
     var _this3 = this;
@@ -256,7 +248,7 @@ var external_vue_default = /*#__PURE__*/__webpack_require__.n(external_vue_);
     this.referenceElm = this.$el;
     if (this.$el.nodeType === 1) {
       this.$el.setAttribute('aria-describedby', this.tooltipId);
-      this.$el.setAttribute('tabindex', 0);
+      this.$el.setAttribute('tabindex', this.tabindex);
       Object(dom_["on"])(this.referenceElm, 'mouseenter', this.show);
       Object(dom_["on"])(this.referenceElm, 'mouseleave', this.hide);
       Object(dom_["on"])(this.referenceElm, 'focus', function () {
@@ -273,6 +265,14 @@ var external_vue_default = /*#__PURE__*/__webpack_require__.n(external_vue_);
       });
       Object(dom_["on"])(this.referenceElm, 'blur', this.handleBlur);
       Object(dom_["on"])(this.referenceElm, 'click', this.removeFocusing);
+    }
+    // fix issue https://github.com/ElemeFE/element/issues/14424
+    if (this.value && this.popperVM) {
+      this.popperVM.$nextTick(function () {
+        if (_this3.value) {
+          _this3.updatePopper();
+        }
+      });
     }
   },
 
@@ -305,9 +305,12 @@ var external_vue_default = /*#__PURE__*/__webpack_require__.n(external_vue_);
     removeFocusing: function removeFocusing() {
       this.focusing = false;
     },
-    concatClass: function concatClass(a, b) {
-      if (a && a.indexOf(b) > -1) return a;
-      return a ? b ? a + ' ' + b : a : b || '';
+    addTooltipClass: function addTooltipClass(prev) {
+      if (!prev) {
+        return 'el-tooltip';
+      } else {
+        return 'el-tooltip ' + prev.replace('el-tooltip', '');
+      }
     },
     handleShowPopper: function handleShowPopper() {
       var _this4 = this;
@@ -342,6 +345,17 @@ var external_vue_default = /*#__PURE__*/__webpack_require__.n(external_vue_);
         clearTimeout(this.timeoutPending);
       }
       this.expectedState = expectedState;
+    },
+    getFirstElement: function getFirstElement() {
+      var slots = this.$slots.default;
+      if (!Array.isArray(slots)) return null;
+      var element = null;
+      for (var index = 0; index < slots.length; index++) {
+        if (slots[index] && slots[index].tag) {
+          element = slots[index];
+        };
+      }
+      return element;
     }
   },
 
@@ -350,11 +364,13 @@ var external_vue_default = /*#__PURE__*/__webpack_require__.n(external_vue_);
   },
   destroyed: function destroyed() {
     var reference = this.referenceElm;
-    Object(dom_["off"])(reference, 'mouseenter', this.show);
-    Object(dom_["off"])(reference, 'mouseleave', this.hide);
-    Object(dom_["off"])(reference, 'focus', this.handleFocus);
-    Object(dom_["off"])(reference, 'blur', this.handleBlur);
-    Object(dom_["off"])(reference, 'click', this.removeFocusing);
+    if (reference.nodeType === 1) {
+      Object(dom_["off"])(reference, 'mouseenter', this.show);
+      Object(dom_["off"])(reference, 'mouseleave', this.hide);
+      Object(dom_["off"])(reference, 'focus', this.handleFocus);
+      Object(dom_["off"])(reference, 'blur', this.handleBlur);
+      Object(dom_["off"])(reference, 'click', this.removeFocusing);
+    }
   }
 });
 // CONCATENATED MODULE: ./packages/tooltip/index.js
@@ -369,7 +385,7 @@ main.install = function (Vue) {
 
 /***/ }),
 
-/***/ 14:
+/***/ 17:
 /***/ (function(module, exports) {
 
 module.exports = require("throttle-debounce/debounce");
@@ -383,14 +399,7 @@ module.exports = require("element-ui/lib/utils/dom");
 
 /***/ }),
 
-/***/ 20:
-/***/ (function(module, exports) {
-
-module.exports = require("element-ui/lib/utils/vdom");
-
-/***/ }),
-
-/***/ 4:
+/***/ 3:
 /***/ (function(module, exports) {
 
 module.exports = require("element-ui/lib/utils/util");
@@ -404,7 +413,7 @@ module.exports = require("element-ui/lib/utils/vue-popper");
 
 /***/ }),
 
-/***/ 6:
+/***/ 7:
 /***/ (function(module, exports) {
 
 module.exports = require("vue");

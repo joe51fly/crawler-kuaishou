@@ -139,7 +139,12 @@
       }
     },
     watch: {
-      defaultActive: 'updateActiveIndex',
+      defaultActive(value){
+        if(!this.items[value]){
+          this.activeIndex = null
+        }
+        this.updateActiveIndex(value)
+      },
 
       defaultOpeneds(value) {
         if (!this.collapse) {
@@ -266,7 +271,12 @@
         if (this.router && hasIndex) {
           this.routeToItem(item, (error) => {
             this.activeIndex = oldActiveIndex;
-            if (error) console.error(error);
+            if (error) {
+              // vue-router 3.1.0+ push/replace cause NavigationDuplicated error 
+              // https://github.com/ElemeFE/element/issues/17044
+              if (error.name === 'NavigationDuplicated') return
+              console.error(error)
+            }
           });
         }
       },

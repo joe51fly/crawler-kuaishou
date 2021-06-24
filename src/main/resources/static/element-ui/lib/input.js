@@ -82,7 +82,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 61);
+/******/ 	return __webpack_require__(__webpack_require__.s = 76);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -189,21 +189,28 @@ function normalizeComponent (
 
 /***/ }),
 
-/***/ 10:
+/***/ 11:
 /***/ (function(module, exports) {
 
 module.exports = require("element-ui/lib/mixins/migrating");
 
 /***/ }),
 
-/***/ 3:
+/***/ 21:
+/***/ (function(module, exports) {
+
+module.exports = require("element-ui/lib/utils/shared");
+
+/***/ }),
+
+/***/ 4:
 /***/ (function(module, exports) {
 
 module.exports = require("element-ui/lib/mixins/emitter");
 
 /***/ }),
 
-/***/ 61:
+/***/ 76:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -222,6 +229,7 @@ var render = function() {
         _vm.inputSize ? "el-input--" + _vm.inputSize : "",
         {
           "is-disabled": _vm.inputDisabled,
+          "is-exceed": _vm.inputExceed,
           "el-input-group": _vm.$slots.prepend || _vm.$slots.append,
           "el-input-group--append": _vm.$slots.append,
           "el-input-group--prepend": _vm.$slots.prepend,
@@ -272,11 +280,10 @@ var render = function() {
                         autocomplete: _vm.autoComplete || _vm.autocomplete,
                         "aria-label": _vm.label
                       },
-                      domProps: { value: _vm.nativeInputValue },
                       on: {
-                        compositionstart: _vm.handleComposition,
-                        compositionupdate: _vm.handleComposition,
-                        compositionend: _vm.handleComposition,
+                        compositionstart: _vm.handleCompositionStart,
+                        compositionupdate: _vm.handleCompositionUpdate,
+                        compositionend: _vm.handleCompositionEnd,
                         input: _vm.handleInput,
                         focus: _vm.handleFocus,
                         blur: _vm.handleBlur,
@@ -305,17 +312,15 @@ var render = function() {
                   2
                 )
               : _vm._e(),
-            _vm.$slots.suffix ||
-            _vm.suffixIcon ||
-            _vm.showClear ||
-            _vm.showPassword ||
-            (_vm.validateState && _vm.needStatusIcon)
+            _vm.getSuffixVisible()
               ? _c("span", { staticClass: "el-input__suffix" }, [
                   _c(
                     "span",
                     { staticClass: "el-input__suffix-inner" },
                     [
-                      !_vm.showClear || !_vm.showPwdVisible
+                      !_vm.showClear ||
+                      !_vm.showPwdVisible ||
+                      !_vm.isWordLimitVisible
                         ? [
                             _vm._t("suffix"),
                             _vm.suffixIcon
@@ -330,7 +335,12 @@ var render = function() {
                         ? _c("i", {
                             staticClass:
                               "el-input__icon el-icon-circle-close el-input__clear",
-                            on: { click: _vm.clear }
+                            on: {
+                              mousedown: function($event) {
+                                $event.preventDefault()
+                              },
+                              click: _vm.clear
+                            }
                           })
                         : _vm._e(),
                       _vm.showPwdVisible
@@ -339,6 +349,23 @@ var render = function() {
                               "el-input__icon el-icon-view el-input__clear",
                             on: { click: _vm.handlePasswordVisible }
                           })
+                        : _vm._e(),
+                      _vm.isWordLimitVisible
+                        ? _c("span", { staticClass: "el-input__count" }, [
+                            _c(
+                              "span",
+                              { staticClass: "el-input__count-inner" },
+                              [
+                                _vm._v(
+                                  "\n            " +
+                                    _vm._s(_vm.textLength) +
+                                    "/" +
+                                    _vm._s(_vm.upperLimit) +
+                                    "\n          "
+                                )
+                              ]
+                            )
+                          ])
                         : _vm._e()
                     ],
                     2
@@ -374,11 +401,10 @@ var render = function() {
                   autocomplete: _vm.autoComplete || _vm.autocomplete,
                   "aria-label": _vm.label
                 },
-                domProps: { value: _vm.nativeInputValue },
                 on: {
-                  compositionstart: _vm.handleComposition,
-                  compositionupdate: _vm.handleComposition,
-                  compositionend: _vm.handleComposition,
+                  compositionstart: _vm.handleCompositionStart,
+                  compositionupdate: _vm.handleCompositionUpdate,
+                  compositionend: _vm.handleCompositionEnd,
                   input: _vm.handleInput,
                   focus: _vm.handleFocus,
                   blur: _vm.handleBlur,
@@ -389,7 +415,12 @@ var render = function() {
               _vm.$attrs,
               false
             )
-          )
+          ),
+      _vm.isWordLimitVisible && _vm.type === "textarea"
+        ? _c("span", { staticClass: "el-input__count" }, [
+            _vm._v(_vm._s(_vm.textLength) + "/" + _vm._s(_vm.upperLimit))
+          ])
+        : _vm._e()
     ],
     2
   )
@@ -401,11 +432,11 @@ render._withStripped = true
 // CONCATENATED MODULE: ./packages/input/src/input.vue?vue&type=template&id=343dd774&
 
 // EXTERNAL MODULE: external "element-ui/lib/mixins/emitter"
-var emitter_ = __webpack_require__(3);
+var emitter_ = __webpack_require__(4);
 var emitter_default = /*#__PURE__*/__webpack_require__.n(emitter_);
 
 // EXTERNAL MODULE: external "element-ui/lib/mixins/migrating"
-var migrating_ = __webpack_require__(10);
+var migrating_ = __webpack_require__(11);
 var migrating_default = /*#__PURE__*/__webpack_require__.n(migrating_);
 
 // CONCATENATED MODULE: ./packages/input/src/calcTextareaHeight.js
@@ -482,8 +513,11 @@ function calcTextareaHeight(targetElement) {
   return result;
 };
 // EXTERNAL MODULE: external "element-ui/lib/utils/merge"
-var merge_ = __webpack_require__(8);
+var merge_ = __webpack_require__(9);
 var merge_default = /*#__PURE__*/__webpack_require__.n(merge_);
+
+// EXTERNAL MODULE: external "element-ui/lib/utils/shared"
+var shared_ = __webpack_require__(21);
 
 // CONCATENATED MODULE: ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./packages/input/src/input.vue?vue&type=script&lang=js&
 //
@@ -589,6 +623,13 @@ var merge_default = /*#__PURE__*/__webpack_require__.n(merge_);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+
 
 
 
@@ -618,7 +659,7 @@ var merge_default = /*#__PURE__*/__webpack_require__.n(merge_);
       textareaCalcStyle: {},
       hovering: false,
       focused: false,
-      isOnComposition: false,
+      isComposing: false,
       passwordVisible: false
     };
   },
@@ -666,6 +707,10 @@ var merge_default = /*#__PURE__*/__webpack_require__.n(merge_);
       type: Boolean,
       default: false
     },
+    showWordLimit: {
+      type: Boolean,
+      default: false
+    },
     tabindex: String
   },
 
@@ -696,13 +741,30 @@ var merge_default = /*#__PURE__*/__webpack_require__.n(merge_);
       return this.disabled || (this.elForm || {}).disabled;
     },
     nativeInputValue: function nativeInputValue() {
-      return this.value === null || this.value === undefined ? '' : this.value;
+      return this.value === null || this.value === undefined ? '' : String(this.value);
     },
     showClear: function showClear() {
       return this.clearable && !this.inputDisabled && !this.readonly && this.nativeInputValue && (this.focused || this.hovering);
     },
     showPwdVisible: function showPwdVisible() {
       return this.showPassword && !this.inputDisabled && !this.readonly && (!!this.nativeInputValue || this.focused);
+    },
+    isWordLimitVisible: function isWordLimitVisible() {
+      return this.showWordLimit && this.$attrs.maxlength && (this.type === 'text' || this.type === 'textarea') && !this.inputDisabled && !this.readonly && !this.showPassword;
+    },
+    upperLimit: function upperLimit() {
+      return this.$attrs.maxlength;
+    },
+    textLength: function textLength() {
+      if (typeof this.value === 'number') {
+        return String(this.value).length;
+      }
+
+      return (this.value || '').length;
+    },
+    inputExceed: function inputExceed() {
+      // show exceed style if length of initial value greater then maxlength
+      return this.isWordLimitVisible && this.textLength > this.upperLimit;
     }
   },
 
@@ -712,6 +774,26 @@ var merge_default = /*#__PURE__*/__webpack_require__.n(merge_);
       if (this.validateEvent) {
         this.dispatch('ElFormItem', 'el.form.change', [val]);
       }
+    },
+
+    // native input value is set explicitly
+    // do not use v-model / :value in template
+    // see: https://github.com/ElemeFE/element/issues/14521
+    nativeInputValue: function nativeInputValue() {
+      this.setNativeInputValue();
+    },
+
+    // when change between <input> and <textarea>,
+    // update DOM dependent value and styles
+    // https://github.com/ElemeFE/element/issues/14857
+    type: function type() {
+      var _this = this;
+
+      this.$nextTick(function () {
+        _this.setNativeInputValue();
+        _this.resizeTextarea();
+        _this.updateIconOffset();
+      });
     }
   },
 
@@ -760,23 +842,34 @@ var merge_default = /*#__PURE__*/__webpack_require__.n(merge_);
 
       this.textareaCalcStyle = calcTextareaHeight(this.$refs.textarea, minRows, maxRows);
     },
+    setNativeInputValue: function setNativeInputValue() {
+      var input = this.getInput();
+      if (!input) return;
+      if (input.value === this.nativeInputValue) return;
+      input.value = this.nativeInputValue;
+    },
     handleFocus: function handleFocus(event) {
       this.focused = true;
       this.$emit('focus', event);
     },
-    handleComposition: function handleComposition(event) {
-      if (event.type === 'compositionstart') {
-        this.isOnComposition = true;
-      }
-      if (event.type === 'compositionend') {
-        this.isOnComposition = false;
+    handleCompositionStart: function handleCompositionStart() {
+      this.isComposing = true;
+    },
+    handleCompositionUpdate: function handleCompositionUpdate(event) {
+      var text = event.target.value;
+      var lastCharacter = text[text.length - 1] || '';
+      this.isComposing = !Object(shared_["isKorean"])(lastCharacter);
+    },
+    handleCompositionEnd: function handleCompositionEnd(event) {
+      if (this.isComposing) {
+        this.isComposing = false;
         this.handleInput(event);
       }
     },
     handleInput: function handleInput(event) {
-      var _this = this;
-
-      if (this.isOnComposition) return;
+      // should not emit input during composition
+      // see: https://github.com/ElemeFE/element/issues/10516
+      if (this.isComposing) return;
 
       // hack for https://github.com/ElemeFE/element/issues/8548
       // should remove the following line when we don't support IE
@@ -784,12 +877,9 @@ var merge_default = /*#__PURE__*/__webpack_require__.n(merge_);
 
       this.$emit('input', event.target.value);
 
-      // set input's value, in case parent refuses the change
+      // ensure native input value is controlled
       // see: https://github.com/ElemeFE/element/issues/12850
-      this.$nextTick(function () {
-        var input = _this.getInput();
-        input.value = _this.value;
-      });
+      this.$nextTick(this.setNativeInputValue);
     },
     handleChange: function handleChange(event) {
       this.$emit('change', event.target.value);
@@ -827,11 +917,18 @@ var merge_default = /*#__PURE__*/__webpack_require__.n(merge_);
       this.$emit('clear');
     },
     handlePasswordVisible: function handlePasswordVisible() {
+      var _this2 = this;
+
       this.passwordVisible = !this.passwordVisible;
-      this.focus();
+      this.$nextTick(function () {
+        _this2.focus();
+      });
     },
     getInput: function getInput() {
       return this.$refs.input || this.$refs.textarea;
+    },
+    getSuffixVisible: function getSuffixVisible() {
+      return this.$slots.suffix || this.suffixIcon || this.showClear || this.showPassword || this.isWordLimitVisible || this.validateState && this.needStatusIcon;
     }
   },
 
@@ -839,6 +936,7 @@ var merge_default = /*#__PURE__*/__webpack_require__.n(merge_);
     this.$on('inputSelect', this.select);
   },
   mounted: function mounted() {
+    this.setNativeInputValue();
     this.resizeTextarea();
     this.updateIconOffset();
   },
@@ -886,7 +984,7 @@ input.install = function (Vue) {
 
 /***/ }),
 
-/***/ 8:
+/***/ 9:
 /***/ (function(module, exports) {
 
 module.exports = require("element-ui/lib/utils/merge");

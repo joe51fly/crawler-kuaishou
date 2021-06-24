@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>登录</title>
+    <link rel="stylesheet" href="/element-ui/lib/theme-chalk/index.css">
+    <link rel="shortcut icon" href='#'>
+
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        #app {
+            font-family: "Avenir", Helvetica, Arial, sans-serif;
+            /*-webkit-font-smoothing: antialiased;*/
+            /*-moz-osx-font-smoothing: grayscale;*/
+            color: #2c3e50;
+            height: 100%;
+        }
+        #errormessage{
+            color:#ff0000;
+        }
+    </style>
+
+</head>
+
+<body>
+<div id="app">
+    <div>
+        <div style="margin-top: 150px">
+            <div class="myCookie">
+                <label>短视频Cookie:</label>
+                <label for="shortVideoCookie"> </label><input type="text" id="shortVideoCookie" v-model="myCookie.shortVideoCookie" placeholder="请输入短视频Cookie">
+            </div>
+            <div class="myCookie">
+                <label>直播Cookie:</label>
+                <input type="text" id="liveCookie" v-model="myCookie.liveCookie" placeholder="请输入直播Cookie"
+                       @keydown.enter.native="doLogin">
+            </div>
+            <div id="errormessage"></div>
+            <button type="button" id="denglubutton" @click="doLogin" style="width: 300px">登陆</button>
+        </div>
+        <!--flex弹性盒子模型，justify-content：主抽 -->
+        <div style="display: flex;justify-content: center;margin-top: 150px">
+<!--            <el-card style="width: 400px" class="box-card">-->
+<!--                <div slot="header" class="clearfix">-->
+<!--                    <span>登录</span>-->
+<!--                </div>-->
+<!--                <table>-->
+<!--                    <tr>-->
+<!--                        <td>短视频Cookie</td>-->
+<!--                        <td>-->
+<!--                            <el-input v-model="myCookie.shortVideoCookie" placeholder="请输入短视频Cookie"></el-input>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <td>直播Cookie</td>-->
+<!--                        <td>-->
+<!--                            <el-input type="password" v-model="myCookie.liveCookie" placeholder="请输入直播Cookie"-->
+<!--                                      @keydown.enter.native="doLogin"></el-input>-->
+<!--                            &lt;!&ndash; @keydown.enter.native="doLogin"当按下enter键的时候也会执行doLogin方法&ndash;&gt;-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        &lt;!&ndash; 占两行&ndash;&gt;-->
+<!--                        <td colspan="2">-->
+<!--                            &lt;!&ndash; 点击事件的两种不同的写法v-on:click和 @click&ndash;&gt;-->
+<!--                            &lt;!&ndash;<el-button style="width: 300px" type="primary" v-on:click="doLogin">登录</el-button>&ndash;&gt;-->
+<!--                            <el-button style="width: 300px" type="primary" @click="doLogin">登录</el-button>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+<!--                </table>-->
+<!--            </el-card>-->
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/js/vue.js"></script>
+<!--<script type="text/javascript" src="/element-ui/lib/index.js"></script>-->
+<!--<script type="text/javascript" src="/js/vue-resource.js"></script>-->
+<script type="text/javascript" src="/js/axios.js"></script>
+<script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+<script type="module" src="/js/test1.js"></script>
+<script type="text/javascript">
+
+    var app = new Vue({
+        data: {
+            user: {
+                shortVideoCookie: 'aaaa',
+                liveCookie: 'bbb',
+                //为了登录方便，可以直接在这里写好用户名和密码的值
+            }
+        },
+        methods: {
+            doLogin() {//一点击登录按钮，这个方法就会执行
+                alert(JSON.stringify(this.user))//可以直接把this.user对象传给后端进行校验用户名和密码
+            }
+        },
+    });
+</script>
+
+</body>
+</html>

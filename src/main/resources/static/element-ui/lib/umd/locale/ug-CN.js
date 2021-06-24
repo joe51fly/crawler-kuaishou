@@ -84,7 +84,8 @@
       cascader: {
         noMatch: 'ئۇچۇر تېپىلمىدى',
         loading: 'يۈكلىنىۋاتىدۇ',
-        placeholder: 'تاللاڭ'
+        placeholder: 'تاللاڭ',
+        noData: 'ئۇچۇر يوق'
       },
       pagination: {
         goto: 'كىيىنكى بەت',
@@ -121,6 +122,16 @@
         filterPlaceholder: 'ئىزدىمەكچى بولغان مەزمۇننى كىرگۈزۈڭ',
         noCheckedFormat: 'جەمئىي {total} تۈر',
         hasCheckedFormat: 'تاللانغىنى {checked}/{total} تۈر'
+      },
+      image: {
+        error: 'مەغلۇب بولدى'
+      },
+      pageHeader: {
+        title: 'قايتىش'
+      },
+      popconfirm: {
+        confirmButtonText: 'ھەئە',
+        cancelButtonText: 'ياق'
       }
     }
   };
