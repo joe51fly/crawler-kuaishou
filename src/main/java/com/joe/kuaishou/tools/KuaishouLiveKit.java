@@ -4,8 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * 获取快手我的关注正在直播的列表信息
@@ -24,15 +23,18 @@ public class KuaishouLiveKit {
         this.threadData = threadData;
     }
 
-    private static final String winPath =  "F:\\Applications\\workSpaces\\crawler-kuaishou\\KsCrawler3.0.py";
-    private static final String linuxPath =  "/home/root/java-project/KsCrawler-2.7.py";
 
-   public String KsCrawlerKit(String headers, String url) {
+    public String KsCrawlerKit(String headers, String payload, String url, String pythonPath) {
         Process process = null;
         BufferedReader inputStream = null;
         BufferedReader errorStream = null;
         try {
-            String[] args = new String[]{"python",winPath, headers, url};
+            String[] args = null;
+            if (payload == null) {
+                args = new String[]{"python", pythonPath, headers, url};
+            } else {
+                args = new String[]{"python", pythonPath, headers, payload, url};
+            }
             process = Runtime.getRuntime().exec(args);
             InputStream inputStream1 = process.getInputStream();
             InputStream errorStream1 = process.getErrorStream();
@@ -118,20 +120,42 @@ public class KuaishouLiveKit {
     }
 
 
-    public void writeProperties(HashMap<String, String> mapData) {
-        String path = this.getClass().getClassLoader().getResource("ksLiveData.properties").getPath();
+    public void writeProperties(HashMap<String, String> mapData, String ksProfilePath,String comment) {
+        String path = this.getClass().getClassLoader().getResource(ksProfilePath).getPath();
         Properties properties = new Properties();
         FileWriter fileWriter = null;
         try {
+            Iterator<Map.Entry<String, String>> entryIterator = mapData.entrySet().iterator();
+            while (entryIterator.hasNext()){
+                Map.Entry entry = (Map.Entry)entryIterator.next();
+                Object key = entry.getKey();
+                Object value = entry.getValue();
+                properties.setProperty((String) key, (String) value);
+                System.out.println(key+":"+value);
+            }
+            /*//直播数据写入
             String originalUrl = mapData.get("originalUrl");
             String userAgent = mapData.get("userAgent");
             String liveCookie = mapData.get("liveCookie");
+            //短视频数据的写入
+            String originalPostUrl = mapData.get("originalPostUrl");
+            String shortVideoCookie = mapData.get("shortVideoCookie");
+            String shortVideoHost = mapData.get("shortVideoHost");
+            String contentType = mapData.get("contentType");
 
-            properties.setProperty("originalUrl", originalUrl);
-            properties.setProperty("userAgent", userAgent);
-            properties.setProperty("liveCookie", liveCookie);
-            fileWriter = new FileWriter(path);
-            properties.store(fileWriter, "setData");   //保存到流
+            if (originalPostUrl != null) {
+                properties.setProperty("userAgent", userAgent);
+                properties.setProperty("originalPostUrl", originalPostUrl);
+                properties.setProperty("shortVideoCookie", shortVideoCookie);
+                properties.setProperty("shortVideoHost", shortVideoHost);
+                properties.setProperty("contentType", contentType);
+            } else {
+                properties.setProperty("originalUrl", originalUrl);
+                properties.setProperty("userAgent", userAgent);
+                properties.setProperty("liveCookie", liveCookie);
+            }*/
+            fileWriter = new FileWriter(path,true);
+            properties.store(fileWriter, comment);   //保存到流
             logger.info("数据写入完成：{}", mapData.toString());
         } catch (FileNotFoundException e) {
             logger.error("数据读取失败：{}", e);
@@ -140,23 +164,30 @@ public class KuaishouLiveKit {
             logger.error("数据读取失败：{}", e);
             e.printStackTrace();
         } finally {
-           if (fileWriter != null){
-               try {
-                   fileWriter.close();
-               } catch (IOException e) {
-                   e.printStackTrace();
-               }
-           }
+            if (fileWriter != null) {
+                try {
+                    fileWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
-    public String readProperties(String key) {
-        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("ksLiveData.properties");
+    public HashMap<String, String> readProperties(String ksProfilePath) {
+        InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(ksProfilePath);
         Properties properties = new Properties();
+        HashMap<String, String> ksProfileMap = new HashMap<String, String>();
         try {
             properties.load(resourceAsStream);    //从流读取properties文件内容
-            String value = properties.getProperty(key);
-            return value;
+            Set<String> ksProfileKey = properties.stringPropertyNames();
+            Iterator<String> ksyIterator = ksProfileKey.iterator();
+            while (ksyIterator.hasNext()) {
+                String key = ksyIterator.next();
+                String value = properties.getProperty(key);
+                ksProfileMap.put(key, value);
+            }
+            return ksProfileMap;
         } catch (IOException e) {
             logger.error("数据读取失败：{}", e);
             e.printStackTrace();
@@ -169,7 +200,7 @@ public class KuaishouLiveKit {
                 }
             }
         }
-        return "";
+        return ksProfileMap;
     }
 }
 

@@ -82,7 +82,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 64);
+/******/ 	return __webpack_require__(__webpack_require__.s = 74);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -196,7 +196,7 @@ module.exports = require("element-ui/lib/utils/dom");
 
 /***/ }),
 
-/***/ 4:
+/***/ 3:
 /***/ (function(module, exports) {
 
 module.exports = require("element-ui/lib/utils/util");
@@ -210,14 +210,14 @@ module.exports = require("element-ui/lib/utils/vue-popper");
 
 /***/ }),
 
-/***/ 6:
+/***/ 7:
 /***/ (function(module, exports) {
 
 module.exports = require("vue");
 
 /***/ }),
 
-/***/ 64:
+/***/ 74:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -276,9 +276,14 @@ var render = function() {
           )
         ]
       ),
-      _vm._t("reference")
+      _c(
+        "span",
+        { ref: "wrapper", staticClass: "el-popover__reference-wrapper" },
+        [_vm._t("reference")],
+        2
+      )
     ],
-    2
+    1
   )
 }
 var staticRenderFns = []
@@ -295,9 +300,11 @@ var vue_popper_default = /*#__PURE__*/__webpack_require__.n(vue_popper_);
 var dom_ = __webpack_require__(2);
 
 // EXTERNAL MODULE: external "element-ui/lib/utils/util"
-var util_ = __webpack_require__(4);
+var util_ = __webpack_require__(3);
 
 // CONCATENATED MODULE: ./node_modules/babel-loader/lib!./node_modules/vue-loader/lib??vue-loader-options!./packages/popover/src/main.vue?vue&type=script&lang=js&
+//
+//
 //
 //
 //
@@ -344,6 +351,10 @@ var util_ = __webpack_require__(4);
       type: Number,
       default: 0
     },
+    closeDelay: {
+      type: Number,
+      default: 200
+    },
     title: String,
     disabled: Boolean,
     content: String,
@@ -360,6 +371,10 @@ var util_ = __webpack_require__(4);
     transition: {
       type: String,
       default: 'fade-in-linear'
+    },
+    tabindex: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -383,14 +398,14 @@ var util_ = __webpack_require__(4);
     var reference = this.referenceElm = this.reference || this.$refs.reference;
     var popper = this.popper || this.$refs.popper;
 
-    if (!reference && this.$slots.reference && this.$slots.reference[0]) {
-      reference = this.referenceElm = this.$slots.reference[0].elm;
+    if (!reference && this.$refs.wrapper.children) {
+      reference = this.referenceElm = this.$refs.wrapper.children[0];
     }
     // 可访问性
     if (reference) {
       Object(dom_["addClass"])(reference, 'el-popover__reference');
       reference.setAttribute('aria-describedby', this.tooltipId);
-      reference.setAttribute('tabindex', 0); // tab序列
+      reference.setAttribute('tabindex', this.tabindex); // tab序列
       popper.setAttribute('tabindex', 0);
 
       if (this.trigger !== 'click') {
@@ -417,6 +432,9 @@ var util_ = __webpack_require__(4);
       Object(dom_["on"])(reference, 'mouseleave', this.handleMouseLeave);
       Object(dom_["on"])(popper, 'mouseleave', this.handleMouseLeave);
     } else if (this.trigger === 'focus') {
+      if (this.tabindex < 0) {
+        console.warn('[Element Warn][Popover]a negative taindex means that the element cannot be focused by tab key');
+      }
       if (reference.querySelector('input, textarea')) {
         Object(dom_["on"])(reference, 'focusin', this.doShow);
         Object(dom_["on"])(reference, 'focusout', this.doClose);
@@ -477,16 +495,20 @@ var util_ = __webpack_require__(4);
       var _this3 = this;
 
       clearTimeout(this._timer);
-      this._timer = setTimeout(function () {
-        _this3.showPopper = false;
-      }, 200);
+      if (this.closeDelay) {
+        this._timer = setTimeout(function () {
+          _this3.showPopper = false;
+        }, this.closeDelay);
+      } else {
+        this.showPopper = false;
+      }
     },
     handleDocumentClick: function handleDocumentClick(e) {
       var reference = this.reference || this.$refs.reference;
       var popper = this.popper || this.$refs.popper;
 
-      if (!reference && this.$slots.reference && this.$slots.reference[0]) {
-        reference = this.referenceElm = this.$slots.reference[0].elm;
+      if (!reference && this.$refs.wrapper.children) {
+        reference = this.referenceElm = this.$refs.wrapper.children[0];
       }
       if (!this.$el || !reference || this.$el.contains(e.target) || reference.contains(e.target) || !popper || popper.contains(e.target)) return;
       this.showPopper = false;
@@ -499,7 +521,7 @@ var util_ = __webpack_require__(4);
       this.doDestroy();
     },
     cleanup: function cleanup() {
-      if (this.openDelay) {
+      if (this.openDelay || this.closeDelay) {
         clearTimeout(this._timer);
       }
     }
@@ -570,7 +592,7 @@ var getReference = function getReference(el, binding, vnode) {
   }
 });
 // EXTERNAL MODULE: external "vue"
-var external_vue_ = __webpack_require__(6);
+var external_vue_ = __webpack_require__(7);
 var external_vue_default = /*#__PURE__*/__webpack_require__.n(external_vue_);
 
 // CONCATENATED MODULE: ./packages/popover/index.js
