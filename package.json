@@ -14,11 +14,14 @@
   "dependencies": {
     "element-ui": "^2.15.2",
     "jquery": "^3.6.0",
+    "pkcs7": "^0.2.3",
+    "video.js": "^6.13.0",
     "videojs-contrib-hls": "^5.15.0",
+    "videojs-flvjs": "^0.2.0",
     "vue": "^2.5.2",
     "vue-jsonp": "^2.0.0",
-    "vue-router": "^3.0.1",
-    "vue-video-player": "^5.0.2"
+    "vue-resource": "^1.5.3",
+    "vue-router": "^3.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

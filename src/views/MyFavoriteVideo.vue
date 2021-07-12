@@ -1,27 +1,18 @@
 <template>
   <div align="center">
     <h2 style="color: hotpink">我的关注</h2>
-    <h3>当前直播人数:<span style="color: red">{{list.length}}</span></h3>
     <br/>
-    <div id="inputData">
-<!--      视频播放:<input type="text" id="inputVideoId" v-model="inputVideoUrl"/>-->
-<!--      <input type="button" id="playBtn" value="播放" @click="inputVideoBtn($event)"/>-->
-<!--      <br/>-->
-     当前正在播放视频的链接:<input type="text" id="playIpt" v-model="playVideoUrl"/>
-      <br>
-<!--      <div ref="videoBox1" id="videoBox1"></div>-->
-    </div>
-    <li :id="`liId+${index}`" v-for="(listData,index) in list.slice(startListIndex, endListIndex)"
+    <li :id="`liId+${index}`" v-for="(myFavorite,index) in myFavoriteListData"
         style="display:inline-block"
         :key=index
         ref="name">
       <el-row type="flex" align="center" :span="10" :id="`imgDiv${index}`">
         <div id="dataCol" class="grid-content">
-          <img :src="listData.rtCoverUrl" v-loading="isLoading"
-               @click="liveUrlPicFun(listData.hlsPlayUrl,listData.playUrls[0].url,$event,index)"
+          <img :src="myFavorite.photo.coverUrl" v-loading="isLoading"
+               @click="liveUrlPicFun(myFavorite.photo.photoUrl,myFavorite.photo.photoUrls[0].url,$event,index)"
                v-show="isImgShow" class="imgClass"/>
           <br/>
-          <span style="font-size: 1.3rem">{{listData.user.user_name}}</span>
+          <span style="font-size: 1.3rem">{{myFavorite.author.name}}</span>
         </div>
       </el-row>
       <div :id="`videoDivBox${index}`" v-show="isVideoDivBoxShow" class="videoDivBoxClass"></div>
@@ -35,19 +26,17 @@
 
 <script>
   import $ from 'jquery';
-  // import videojsFlvjs from "videojs-flvjs"
-  // require("videojs-flvjs")
+
   let myPlayer;
 
   export default {
-    name: 'live-list',
+    name: 'my-favorite-video',
     props: {
       list: [],
-      myFavoriteList : [],
-      myFavoriteObject : {},
+      // myFavoriteList: [],
+      // myFavoriteObject: {},
     },
-    components:{
-    },
+    components: {},
     data() {
       return {
         //项目打包后图片加载不到 所以给前面加上/ks-vue/
@@ -65,12 +54,14 @@
         lastLiItemIdex: 0,
         //播放视频时隐藏点击的图片
         isImgShow: true,
-        //限制初始化页面的时候数据的条数
-        startListIndex: 0,
-        endListIndex: 10,
         //防止底部一次滑动触发多次刷新的方法
         isRefreshBool: true,
-        isShowHint : false,
+        //pcursor : "",
+        myFavoriteListData: [],
+        _pcursor: "",
+        myFavoriteObjectData: Object,
+        isShowHint:false,
+
       }
     },
     methods: {
@@ -94,27 +85,56 @@
       },
       loadList() {
         this.isShowHint = true;
+        this._pcursor = this.myFavoriteObjectData.data.visionProfileLikePhotoList.pcursor;
         setTimeout(() => {
-          this.endListIndex = this.endListIndex + 10;
+          this.$http.post(baseUrl + '/ks/myLikeData',
+            // baseUrl + '/ks/test/live-data',
+            //参数部分，将会拼接在url后面
+            {
+              callback: "a",
+              pcursor: this._pcursor,
+            },
+            {
+              emulateJSON: true
+            }).then(myLikeDataRes => {
+            console.log("myLikeData:", myLikeDataRes);
+            // console.log(response.body.data.follow);
+            if (myLikeDataRes.status !== 200) {
+              this.$message({
+                showClose: true,
+                message: "出问题了，请联系网站管理员查找原因：" + myLikeDataRes.status,
+                type: 'error',
+                duration: 10000,
+              });
+            } else if (myLikeDataRes.body.success) {
+              // this.myFavoriteList = JSON.parse(myLikeDataRes.body.data.result).data.visionProfileLikePhotoList.feeds;
+              this.myFavoriteListData.splice(this.myFavoriteListData.length,0,...myLikeDataRes.body.data.data.visionProfileLikePhotoList.feeds);
+              this.myFavoriteObjectData = myLikeDataRes.body.data;
+            } else {
+              this.$message({
+                showClose: true,
+                message: myLikeDataRes.body.message,
+                type: 'error',
+                duration: 10000,
+              });
+            }
+          }).catch(function (myLikeDataRes) {
+            //出错处理
+            console.log(myLikeDataRes)
+          });
           this.isRefreshBool = true;
         }, 500);
       },
-      liveUrlPicFun(liveUrlFromPic,flyurl, event, index) {
-        console.log(flyurl);
+      liveUrlPicFun(mp4Url, cdnMp4Url, event, index) {
+        // console.log("mp4Url:",mp4Url);
+        // console.log("cdnMp4Url:",cdnMp4Url);
         const thisVideoDivBox = $('#videoDivBox' + index);
         const lastVideoDivBox = $('#videoDivBox' + this.lastLiItemIdex);
         const thisCloseVideoDivImg = $('#videoDivBox' + index + ' + div');
         const lastCloseVideoDivImg = $('#videoDivBox' + this.lastLiItemIdex + ' + div');
         const thisLiveImgDiv = $('#imgDiv' + index);
         const lastLiveImgDiv = $('#imgDiv' + this.lastLiItemIdex);
-        // console.log('thisCloseVideoDivImg', thisCloseVideoDivImg);
-        // console.log('lastCloseVideoDivImg', lastCloseVideoDivImg);
-        // console.log('thisVideoDivBox:', thisVideoDivBox);
-        // console.log('thisLiveImg:', thisLiveImgDiv);
-        // console.log('lastLiveImg:', lastLiveImgDiv);
-        // console.log(myPlayer);
         if (myPlayer !== undefined) {
-          // console.log('lastVideoDivBox:', this.$refs.name[this.lastLiItemIdex].childNodes[2]);
           $('#videoPlayer').hide();/*//点击关闭*/
           myPlayer.dispose();/*//停止*/
           lastVideoDivBox.css('display', 'none');
@@ -123,31 +143,10 @@
           lastCloseVideoDivImg.css('display', 'none');
           lastLiveImgDiv.css('display', 'block');
         }
-        // const liRef = 'li' + index;
-        // console.log(liRef);
-        // console.log('li-ref', this.$refs.name[index]);
         const videoBox = "<div id=\"videoDiv\" ref=\"videoBox2\"><div id=\"videoPlayer\" style=\"width: 20rem\"><video id=\"video\" class=\"video-js vjs-default-skin\" style='height:100%;width:100%;' preload=\"none\" controls=\"true\" autoplay=\"autoplay\"></video></div></div>";
-        // const videoBox = "<div id=\"videoDiv\" ref=\"videoBox2\"><div id=\"videoPlayer\" style=\"width: 20rem\"><video id=\"video\" class=\"video-js vjs-default-skin\" style='height:100%;width:100%;' preload=\"none\" controls=\"true\" autoplay=\"autoplay\"><source :src=liveUrlFromPic type='application/x-mpegURL'></video></div></div>";
-        // this.$refs.videoBox1.innerHTML = videoBox;
         thisVideoDivBox.css('display', 'block');
-        // console.log(this.$refs.name[index].childNodes[2]);
         this.$refs.name[index].childNodes[2].innerHTML = videoBox;
-        // console.log('videoDiv:', $('#videoDiv'));
-        // app.$options.methods.insertAfter(video, clkLi);
-        $('#playIpt').val(liveUrlFromPic);
-        // $('video').append("<source src=" + liveUrlFromPic + " type=\'application\/x-mpegURL\'>");
-        // $('video').append("<source src=" + flyurl + " type=\'video/x-flv\'>");
         $('.videos').show();/*//视频窗口弹出*/
-        // try{
-        //   videojs("video").ready(function () {
-        //     myPlayer = this;
-        //     myPlayer.play();
-        //     // console.log('myPlayer', myPlayer);
-        //   })
-        // }catch (e) {
-        //   console.log("出错了");
-        //   console.log(e);
-        // }
         myPlayer = videojs("video", {
             playbackRates: [0.5, 1.0, 1.5, 2.0, 3.0], //播放速度
             autoplay: true, //如果true,浏览器准备好时开始回放。
@@ -158,62 +157,22 @@
             language: 'zh-CN',
             aspectRatio: '16:9', // 将播放器置于流畅模式，并在计算播放器的动态大小时使用该值。值应该代表一个比例 - 用冒号分隔的两个数字（例如"16:9"或"4:3"）
             fluid: true, // 当true时，Video.js player将拥有流体大小。换句话说，它将按比例缩放以适应其容器。
-            techOrder: ['html5', 'flvjs'], //html5模式和flvjs模式
-            flvjs: { //配置flv相关信息 如果播放flv才配置这个
-              mediaDataSource: {
-                isLive: true, //是否是直播
-                cors: true,//是否跨域
-                withCredentials: false,//是否跨站检测
-              },
-              preload: false,//预加载
-              autoplay: true,//是否自动播放
-            },
+            techOrder: ['html5'], //html5模式和flvjs模式
             sources: [
               {
-                type: 'video/x-flv',
-                src: flyurl //你的m3u8地址（必填）
+                type: 'video/mp4',
+                src: mp4Url //你的m3u8地址（必填）
+              }, {
+                type: 'video/mp4',
+                src: cdnMp4Url //你的m3u8地址（必填）
               },
-              {
-                type: 'application/x-mpegURL',
-                src: liveUrlFromPic //你的m3u8地址（必填）
-              }
             ],
-            // poster: 'poster.jpg', //你的封面地址
-            width: document.documentElement.clientWidth
-            // notSupportedMessage: '此视频暂无法播放，请稍后再试' //允许覆盖Video.js无法播放媒体源时显示的默认信息。
-            //  controlBar: {
-            //   timeDivider: true,
-            //   durationDisplay: true,
-            //   remainingTimeDisplay: false,
-            //   fullscreenToggle: true //全屏按钮
-            //  }
           },
-          // function(){
-          // myPlayer.on('error', function(){
-          //   myPlayer.errorDisplay.close();   //将错误信息不显示
-          //     // 自定义显示方式
-          //     console.log("aaaaa")
-          //   })
-          // }
         );
         thisLiveImgDiv.css('display', 'none');
         thisCloseVideoDivImg.css('display', 'block');
         this.lastLiItemIdex = index;
-        this.playVideoUrl = liveUrlFromPic;
-      },
-      inputVideoBtn(event) {
-        const inputVideoUrl = $('#inputVideoId').val();
-
-        //被点击的btn
-        const clkBtn = event.currentTarget;
-        const videoDiv = $('videoDiv');
-
-        $('#videoPlayer').show();/*!//视频窗口弹出*/
-        console.log('videoPlayer:', $('#videoPlayer'));/*!//视频窗口弹出*/
-        myPlayer = videojs("video");
-        myPlayer.ready(function () {
-          myPlayer.play();
-        });
+        this.playVideoUrl = mp4Url;
       },
       closeVideoPlayer() {
         $('#videoPlayer').hide();/*//隐藏视频播放器*/
@@ -226,6 +185,44 @@
       }
     },
     mounted() {
+      this.$http.post(baseUrl + '/ks/myLikeData',
+        // baseUrl + '/ks/test/live-data',
+        //参数部分，将会拼接在url后面
+        {
+          callback: "a",
+          pcursor: "",
+        },
+        {
+          emulateJSON: true
+        }).then(myLikeDataRes => {
+        console.log("myLikeData:",myLikeDataRes);
+        // console.log(response.body.data.follow);
+        if (myLikeDataRes.status !== 200) {
+          this.$message({
+            showClose: true,
+            message: "出问题了，请联系网站管理员查找原因：" + myLikeDataRes.status,
+            type: 'error',
+            duration: 10000,
+          });
+        } else if (myLikeDataRes.body.success) {
+          // this.myFavoriteList = JSON.parse(myLikeDataRes.body.data.result).data.visionProfileLikePhotoList.feeds;
+          this.myFavoriteListData = myLikeDataRes.body.data.data.visionProfileLikePhotoList.feeds;
+          this.myFavoriteObjectData = myLikeDataRes.body.data;
+          console.log("myFavoriteObject:",myLikeDataRes.body.data);
+          // this.list = response.body.data.result.follow;
+        } else {
+          this.$message({
+            showClose: true,
+            message: myLikeDataRes.body.message,
+            type: 'error',
+            duration: 10000,
+          });
+        }
+      }).catch(function (myLikeDataRes) {
+        //出错处理
+        console.log(myLikeDataRes)
+      });
+
       //监听页面滑动，执行this.loading函数
       window.addEventListener('scroll', this.loading, true);
       //页面刷新时重置this.endListIndex的值
@@ -233,6 +230,10 @@
         // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
         this.endListIndex = 10;
       };
+      // this.myFavoriteListData = this.myFavoriteList;
+      // this.myFavoriteObjectData = this.myFavoriteObject;
+      // console.log("myFavoriteObjectData:",this.myFavoriteObjectData);
+      // console.log("myFavoriteListData:",this.myFavoriteListData);
     },
     destroyed() {
       window.removeEventListener("scroll", this.loading, true);
@@ -243,9 +244,10 @@
 </script>
 
 <style>
-  .hint{
+  .hint {
     margin-top: 1rem;
   }
+
   .imgClass {
     height: 381.5px;
     width: 231px;

@@ -4,6 +4,7 @@ import Login from '../views/login'
 import Home from '../views/Home'
 // import Header from "../views/Header";
 import LiveList from "../views/LiveList";
+import MyFavoriteVideo from "../views/MyFavoriteVideo"
 
 Vue.use(Router)
 
@@ -13,10 +14,6 @@ export default new Router({
   /** 添加上述代码 结束 */
   routes: [
     {
-      path: '/login',
-      component: Login
-    },
-    {
       path: '/home',
       component: Home,
       children: [
@@ -25,14 +22,23 @@ export default new Router({
           name:'live-list',
           component: LiveList,
         },{
+          path: 'my-favorite-video',
+          name:'my-favorite-video',
+          component: MyFavoriteVideo,
+        },{
           path: '',
           redirect: '/home/live-list'
+        },
+        {
+          path: 'login',
+          name:'login',
+          component: Login
         },
       ]
     },
     {
       path: '/',
-      redirect: '/login'
+      redirect: '/home'
     },
   ]
 })

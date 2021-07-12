@@ -7,13 +7,11 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import $ from 'jquery';
 import {VueJsonp} from 'vue-jsonp';
-import vueVideoPlayer from 'vue-video-player';
-import videoJsContribHls from 'videojs-contrib-hls';
+import VueResource from 'vue-resource';
 
+Vue.use(VueResource);
 Vue.use(ElementUI);
 Vue.use(VueJsonp);
-Vue.use(vueVideoPlayer);
-Vue.use(videoJsContribHls);
 
 Vue.config.productionTip = false
 
