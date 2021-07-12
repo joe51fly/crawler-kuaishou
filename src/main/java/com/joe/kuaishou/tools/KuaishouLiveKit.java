@@ -1,5 +1,6 @@
 package com.joe.kuaishou.tools;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public class KuaishouLiveKit {
         BufferedReader errorStream = null;
         try {
             String[] args = null;
-            if (payload == null) {
+            if (StringUtils.isBlank(payload)) {
                 args = new String[]{"python", pythonPath, headers, url};
             } else {
                 args = new String[]{"python", pythonPath, headers, payload, url};
@@ -131,7 +132,7 @@ public class KuaishouLiveKit {
                 Object key = entry.getKey();
                 Object value = entry.getValue();
                 properties.setProperty((String) key, (String) value);
-                System.out.println(key+":"+value);
+//                System.out.println(key+":"+value);
             }
             /*//直播数据写入
             String originalUrl = mapData.get("originalUrl");

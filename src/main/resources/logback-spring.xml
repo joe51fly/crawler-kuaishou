@@ -9,7 +9,7 @@
 属性： contextName 上下文名称； property 设置变量
 节点： appender,  root， logger
 -->
-<configuration scan="true" scanPeriod="10 seconds">
+<configuration scan="true" scanPeriod="60 seconds">
     <!--
        contextName说明：
        每个logger都关联到logger上下文，默认上下文名称为“default”。但可以使用设置成其他名字，
@@ -35,7 +35,7 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <!--此日志appender是为开发使用，只配置最底级别，控制台输出的日志级别是大于或等于此级别的日志信息-->
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>debug</level>
+            <level>DEBUG</level>
         </filter>
 
         <!--日志文档输出格式-->
@@ -233,7 +233,7 @@
         root指定最基础的日志输出级别，level属性指定
         appender-ref标识的appender将会添加到这个logger
     -->
-    <root level="info">
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="DEBUG_FILE"/>
         <appender-ref ref="INFO_FILE"/>
