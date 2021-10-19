@@ -7,7 +7,7 @@
       <br>
     </div>
     <li :id="`liId+${index}`" v-for="(listData,index) in mySpecialFollow.slice(startListIndex, endListIndex)"
-        style="display:inline-block"
+        style="display:inline-block;width: 327px"
         :key=index
         ref="name"
         v-loading="isLoading">
