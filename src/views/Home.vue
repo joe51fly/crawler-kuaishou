@@ -9,12 +9,16 @@
             <span slot="title">登录</span>
           </el-menu-item>
           <el-menu-item index="/home/live-list">
-            <i class="el-icon-menu"></i>
+            <img :src="liveUrl" class="liveClass">
             <span slot="title">直播</span>
           </el-menu-item>
           <el-menu-item index="/home/my-favorite-video">
-<!--            <i class="el-icon-menu"></i>-->
-            <span slot="title">短视频</span>
+            <img :src="redHertUrl" class="redHertClass">
+            <span slot="title">点赞的短视频</span>
+          </el-menu-item>
+          <el-menu-item index="/home/my-special-follow">
+            <img :src="redHertUrl" class="redHertClass">
+            <span slot="title">我的特别关注</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -45,28 +49,16 @@
       return {
         homeMsg: "home-components",
         list: [],
-        // myFavoriteList:[],
-        // myFavoriteObject:{},
-        // collapseBtnClick: false,
         isCollapse: true,
+        redHertUrl:"static/pic/redHert-32.ico",
+        liveUrl:"static/pic/live-48.ico"
       }
     },
     components: {
       MyHeader, Login
     },
     methods: {
-      // collapseStatus() {
-      //   this.collapseBtnClick = this.isCollapse;
-      //   this.isCollapse = !this.isCollapse;
-      // },
-      // collapseOpen() {
-      //   if (this.collapseBtnClick) return;
-      //   this.isCollapse = false;
-      // },
-      // collapseClose() {
-      //   if (this.collapseBtnClick) return;
-      //   this.isCollapse = true;
-      // },
+
     },
 
     mounted() {
@@ -89,7 +81,7 @@
             duration: 10000,
           });
         } else if (response.body.success) {
-          this.list = JSON.parse(response.body.data.result).follow;
+          this.list = response.body.data.follow;
           // console.log(response.body.data.result.follow);
           // this.list = response.body.data.result.follow;
           this.list != null ? this.isLoading = false : this.isLoading = true;
@@ -105,13 +97,22 @@
         //出错处理
         console.log(response)
       });
-
-
     },
   }
 </script>
 
 <style>
+  /*.redHert{*/
+  /*  margin-top: 50%;*/
+  /*  bott-left: 50%;*/
+  /*}*/
+  .redHertClass{
+    margin-left: -4px;
+  }
+  .liveClass{
+    margin-left: -10px;
+  }
+
   .el-aside {
     /*display: flex;*/
     z-index: 2;

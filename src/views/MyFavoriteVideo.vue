@@ -1,6 +1,6 @@
 <template>
   <div align="center">
-    <h2 style="color: hotpink">我的关注</h2>
+    <h2 style="color: hotpink">我点赞的视频</h2>
     <br/>
     <li :id="`liId+${index}`" v-for="(myFavorite,index) in myFavoriteListData"
         style="display:inline-block"
@@ -85,6 +85,7 @@
       },
       loadList() {
         this.isShowHint = true;
+        console.dir('this.myFavoriteObjectData:',this.myFavoriteObjectData)
         this._pcursor = this.myFavoriteObjectData.data.visionProfileLikePhotoList.pcursor;
         setTimeout(() => {
           this.$http.post(baseUrl + '/ks/myLikeData',
@@ -126,8 +127,6 @@
         }, 500);
       },
       liveUrlPicFun(mp4Url, cdnMp4Url, event, index) {
-        // console.log("mp4Url:",mp4Url);
-        // console.log("cdnMp4Url:",cdnMp4Url);
         const thisVideoDivBox = $('#videoDivBox' + index);
         const lastVideoDivBox = $('#videoDivBox' + this.lastLiItemIdex);
         const thisCloseVideoDivImg = $('#videoDivBox' + index + ' + div');
@@ -205,11 +204,9 @@
             duration: 10000,
           });
         } else if (myLikeDataRes.body.success) {
-          // this.myFavoriteList = JSON.parse(myLikeDataRes.body.data.result).data.visionProfileLikePhotoList.feeds;
           this.myFavoriteListData = myLikeDataRes.body.data.data.visionProfileLikePhotoList.feeds;
           this.myFavoriteObjectData = myLikeDataRes.body.data;
           console.log("myFavoriteObject:",myLikeDataRes.body.data);
-          // this.list = response.body.data.result.follow;
         } else {
           this.$message({
             showClose: true,
@@ -230,10 +227,6 @@
         // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
         this.endListIndex = 10;
       };
-      // this.myFavoriteListData = this.myFavoriteList;
-      // this.myFavoriteObjectData = this.myFavoriteObject;
-      // console.log("myFavoriteObjectData:",this.myFavoriteObjectData);
-      // console.log("myFavoriteListData:",this.myFavoriteListData);
     },
     destroyed() {
       window.removeEventListener("scroll", this.loading, true);
@@ -270,6 +263,6 @@
   }
 
   .el-row {
-    margin-top: 2rem;
+    margin: 2rem;
   }
 </style>

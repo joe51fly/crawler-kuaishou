@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Login from '../views/login'
 import Home from '../views/Home'
-// import Header from "../views/Header";
+import MySpecialFollow from '../views/MySpecialFollow'
 import LiveList from "../views/LiveList";
 import MyFavoriteVideo from "../views/MyFavoriteVideo"
 
@@ -26,10 +26,13 @@ export default new Router({
           name:'my-favorite-video',
           component: MyFavoriteVideo,
         },{
+          path: 'my-special-follow',
+          name:'my-special-follow',
+          component: MySpecialFollow,
+        },{
           path: '',
           redirect: '/home/live-list'
-        },
-        {
+        },{
           path: 'login',
           name:'login',
           component: Login

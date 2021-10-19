@@ -62,6 +62,8 @@
           if (response.status === 200){
             if (response.body.success){
               this.$router.push('/home');
+              /*进入home后强制刷新一下页面，否则live-list没有数据*/
+              this.$router.go(0);
             }else {
               this.$message({
                 showClose: true,

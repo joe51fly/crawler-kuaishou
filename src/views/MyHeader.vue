@@ -6,8 +6,7 @@
         </div>
       </el-backtop>
     <div id="linkDiv">
-      <router-link :to="{path:'live-list',param:{list:list}}">直播</router-link>
-
+<!--      <router-link :to="{path:'live-list',param:{list:list}}">直播</router-link>-->
       <div id="userDiv">
         <el-avatar :src="imgUrl"></el-avatar>
         <span v-model="userName"></span>
@@ -38,6 +37,9 @@
       }
     },
     methods: {},
+    mounted() {
+
+    },
   }
 </script>
 
