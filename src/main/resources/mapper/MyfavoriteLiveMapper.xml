@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.joe.kuaishou.mapper.MyfavoriteLiveMapper">
+
+    <select id="getMyfavoriteLiveInfoByEid" resultType="myfavoriteLiveInfo" parameterType="String">
+        select *
+        from myfavorite_live_info
+        where user_eid = #{userEid}
+    </select>
+
+    <select id="getAll" resultType="myfavoriteLiveInfo">
+        select *
+        from myfavorite_live_info
+    </select>
+
+    <select id="getMyfavoriteLiveInfoByIsMyfavorite" resultType="myfavoriteLiveInfo">
+        select *
+        from myfavorite_live_info
+        where is_myfavorite = #{isMyfavorite};
+    </select>
+
+    <insert id="insertMyfavoriteLiveInfo" parameterType="myfavoriteLiveInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into myfavorite_live_info(user_name, user_eid, user_text, user_id, user_liveStream_id, user_head_url,
+                                         cover_url, rt_cover_url, hls_play_url, play_urls, user_kwai_id,
+                                         user_principal_id, is_live, live_start_time, update_time, is_myfavorite,
+                                         remarks)
+        values (#{userName}, #{userEid}, #{userText}, #{userId}, #{userLiveStreamId}, #{userHeadUrl}, #{coverUrl},
+                #{rtCoverUrl}, #{hlsPlayUrl}, #{playUrls}, #{userKwaiId}, #{userPrincipalId}, #{isLive},
+                #{liveStartTime}, #{updateTime}, #{isMyfavorite}, #{remarks})
+    </insert>
+
+    <insert id="insertMyfavoriteLiveInfoByList" parameterType="List">
+        insert into myfavorite_live_info
+        (user_name ,user_eid ,user_text
+        ,user_id,user_liveStream_id,user_head_url,cover_url,rt_cover_url,hls_play_url,play_urls,user_kwai_id,user_principal_id,is_live,live_start_time,update_time,is_myfavorite)
+        values
+        <foreach collection="list" index="index" item="i" separator=",">
+            (#{i.userName},#{i.userEid},#{i.userText},#{i.userId},#{i.userLiveStreamId},#{i.userHeadUrl},#{i.coverUrl},#{i.rtCoverUrl},#{i.hlsPlayUrl},#{i.playUrls},#{i.userKwaiId},#{i.userPrincipalId},#{i.isLive},#{i.liveStartTime},#{i.updateTime},#{i.isMyfavorite})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        user_eid=VALUES(user_eid),
+        user_id=VALUES(user_id)
+    </insert>
+
+    <update id="updateMyfavoriteLiveInfoByEid">
+        update myfavorite_live_info
+        <set>
+            <if test="userName != null">
+                user_name = #{userName},
+            </if>
+            <if test="userText != null">
+                user_text = #{userText},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="userLiveStreamId != null">
+                user_liveStream_id = #{userLiveStreamId},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="userHeadUrl != null">
+                user_head_url = #{userHeadUrl},
+            </if>
+            <if test="coverUrl != null">
+                cover_url = #{coverUrl},
+            </if>
+            <if test="rtCoverUrl != null">
+                rt_cover_url = #{rtCoverUrl},
+            </if>
+            <if test="hlsPlayUrl != null">
+                hls_play_url = #{hlsPlayUrl},
+            </if>
+            <if test="playUrls != null">
+                play_urls = #{playUrls},
+            </if>
+            <if test="userKwaiId != null">
+                user_kwai_id = #{userKwaiId},
+            </if>
+            <if test="userPrincipalId != null">
+                user_principal_id = #{userPrincipalId},
+            </if>
+            <if test="isLive != null">
+                is_live = #{isLive},
+            </if>
+            <if test="liveStartTime != null">
+                live_start_time = #{liveStartTime},
+            </if>
+            <if test="isMyfavorite != null">
+                is_myfavorite = #{isMyfavorite},
+            </if>
+            <if test="remarks != null">
+                remarks = #{remarks},
+            </if>
+        </set>
+        where user_eid = #{userEid}
+    </update>
+
+    <update id="updateIsMyfavoriteLiveInfoByIsMyfavorite" parameterType="myfavoriteLiveInfo">
+        update myfavorite_live_info
+        <set>
+            <if test="isMyfavorite != null">
+                is_myfavorite = #{isMyfavorite},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where user_eid = #{userEid}
+    </update>
+
+    <update id="createMyfavoriteLiveInfoTempTable">
+        CREATE TEMPORARY TABLE IF NOT EXISTS myfavorite_live_info_temp
+        (
+            id                 bigint(56) primary key not null auto_increment,
+            user_name          varchar(40)            not null,
+            user_eid           varchar(30)            not null,
+            user_text          text,
+            user_id            varchar(30),
+            user_liveStream_id varchar(30),
+            user_head_url      text,
+            cover_url          text,
+            rt_cover_url       text,
+            hls_play_url       text,
+            play_urls          text,
+            user_kwai_id       varchar(30),
+            user_principal_id  varchar(30),
+            update_time        datetime
+        ) ENGINE = InnoDB
+          DEFAULT CHARSET = utf8mb4;
+    </update>
+
+
+    <insert id="insertMyfavoriteLiveInfoByListForTemp" parameterType="List">
+        insert into myfavorite_live_info_temp
+        (user_name ,user_eid ,user_text
+        ,user_id,user_liveStream_id,user_head_url,cover_url,rt_cover_url,hls_play_url,play_urls,user_kwai_id,user_principal_id,update_time)
+        values
+        <foreach collection="list" index="index" item="i" separator=",">
+            (#{i.userName},#{i.userEid},#{i.userText},#{i.userId},#{i.userLiveStreamId},#{i.userHeadUrl},#{i.coverUrl},#{i.rtCoverUrl},#{i.hlsPlayUrl},#{i.playUrls},#{i.userKwaiId},#{i.userPrincipalId},#{i.updateTime})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        user_eid=VALUES(user_eid),
+        user_id=VALUES(user_id)
+    </insert>
+
+    <select id="getMySpecialFollowInfo" resultType="myfavoriteLiveInfo">
+        select t.user_name,
+               t.user_eid,
+               t.user_text,
+               t.user_id,
+               t.user_liveStream_id,
+               t.user_head_url,
+               t.cover_url,
+               t.rt_cover_url,
+               t.hls_play_url,
+               t.play_urls,
+               t.update_time
+        from myfavorite_live_info_temp as t
+                 INNER JOIN (select user_eid from myfavorite_live_info where is_myfavorite = true) as m
+                            on t.user_eid = m.user_eid
+        order by is_top desc
+    </select>
+
+    <update id="truncateTemp">
+        truncate table myfavorite_live_info_temp;
+    </update>
+
+    <select id="getAllFromTemp" resultType="myfavoriteLiveInfo">
+        select *
+        from myfavorite_live_info_temp
+    </select>
+
+    <delete id="deleteMyfavoriteLiveInfoByEid">
+        delete
+        from myfavorite_live_info
+        where user_eid = #{userEid}
+    </delete>
+
+    <update id="updateForTheTopByIsTop" parameterType="myfavoriteLiveInfo">
+        update myfavorite_live_info
+        <set>
+            <if test="isTop != null">
+                is_top = #{isTop},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where user_eid = #{userEid}
+    </update>
+</mapper>

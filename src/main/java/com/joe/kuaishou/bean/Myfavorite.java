@@ -3,7 +3,7 @@ package com.joe.kuaishou.bean;
 import java.io.Serializable;
 import java.util.Date;
 
-public class KsLiveMyfavorite implements Serializable {
+public class Myfavorite implements Serializable {
     private Integer id;
     private String ksAnchorName;
     private String ksAnchorId;

@@ -1,0 +1,353 @@
+package com.joe.kuaishou.service.impl;
+
+import com.alibaba.fastjson.JSONObject;
+import com.joe.kuaishou.bean.MyInfo;
+import com.joe.kuaishou.bean.Myfavorite;
+import com.joe.kuaishou.common.Result;
+import com.joe.kuaishou.mapper.MyfavoriteMapper;
+import com.joe.kuaishou.service.MyInfoService;
+import com.joe.kuaishou.service.MyfavoriteService;
+import com.joe.kuaishou.tools.KuaishouLiveKit;
+import com.joe.kuaishou.tools.NowDateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.concurrent.*;
+
+@Service
+public class MyfavoriteServiceImpl implements MyfavoriteService {
+    private static final Logger logger = LoggerFactory.getLogger(MyfavoriteServiceImpl.class);
+
+    @Autowired
+    MyInfoService myInfoService;
+
+    // 每5条数据开启一条线程
+    private static final int threadSize = 5;
+
+    @Autowired
+    MyfavoriteMapper myfavoriteMapper;
+
+    @Override
+    public Myfavorite getMyfavorite(Integer id) {
+        return myfavoriteMapper.getMyfavorite(id);
+    }
+
+    @Override
+    public Myfavorite getMyfavoriteByAnchorId(String anchorId) {
+        return myfavoriteMapper.getMyfavoriteByAnchorId(anchorId);
+    }
+
+    @Override
+    public List<Myfavorite> getAll() {
+        return myfavoriteMapper.getAll();
+    }
+
+    @Override
+    public List<Myfavorite> getMyfavoriteByIsMyfavorite(boolean isMyfavorite) {
+        return myfavoriteMapper.getMyfavoriteByIsMyfavorite(isMyfavorite);
+    }
+
+    @Override
+    public boolean insertMyfavorite(Myfavorite myfavorite) {
+        return myfavoriteMapper.insertMyfavorite(myfavorite);
+    }
+
+    /**
+     * list批量插入-我关注的主播的信息
+     * @param myFollowCount
+     * @return
+     */
+    @Override
+//    @Transactional(isolation = Isolation.REPEATABLE_READ,propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
+    @Transactional
+    public Integer insertMyfavoriteByList(Integer myFollowCount) {
+        // 开始时间
+        long startTotalTime = System.currentTimeMillis();
+        logger.info("start executeAsync");
+        KuaishouLiveKit kslk = new KuaishouLiveKit();
+        int allDataSize = getAll().size();
+        //插入数据的总数
+        final int[] m = {0};
+        //计算循环的次数
+        int n = 0;
+        if (myFollowCount % 30 == 0) {
+            n = myFollowCount / 30;
+        } else {
+            n = myFollowCount / 30 + 1;
+        }
+        logger.info("总共有 {} 条数据，需要循环的总次数：{}",myFollowCount,n);
+        //根据我的关注数 循环执行上面的步骤
+        for (int i = 0; i < n; i++) {
+            long start = System.currentTimeMillis();
+            //获取list数据
+            List<Object> myFavoriteCrawlerList = kslk.myFavoriteCrawlerList(String.valueOf(i * 30));
+
+            //遍历，取出数据并格式化想要的数据 多线程
+            // 总数据条数
+            int dataListSize = myFavoriteCrawlerList.size();
+            logger.info("myFavoriteCrawlerList一共有：{}条数据",myFavoriteCrawlerList.size());
+            // 线程数
+            int threadNum = dataListSize / threadSize + 1;
+            // 定义标记,过滤threadNum为整数
+            boolean special = dataListSize % threadSize == 0;
+
+            // 创建一个线程池
+            ExecutorService exec = Executors.newFixedThreadPool(threadNum);
+            // 定义一个任务集合
+            List<Callable<Integer>> tasks = new ArrayList<Callable<Integer>>();
+            Callable<Integer> task = null;
+            List<Object> cutList = null;
+
+            // 确定每条线程的数据
+            for (int l = 0; l < threadNum; l++) {
+                if (l == threadNum - 1) {
+                    if (special) {
+                        break;
+                    }
+                    cutList = myFavoriteCrawlerList.subList(threadSize * l, dataListSize);
+                } else {
+                    cutList = myFavoriteCrawlerList.subList(threadSize * l, threadSize * (l + 1));
+                }
+//                logger.info("第" + (l + 1) + "组：" + cutList.toString());
+                final List<Object> listSub = cutList;
+                task = new Callable<Integer>() {
+                    @Override
+                    public Integer call() throws Exception {
+                        logger.info(Thread.currentThread().getName() + "线程：" + listSub);
+
+                        List<Myfavorite> listForInsert = new ArrayList<Myfavorite>();
+
+                        Iterator<Object> iterator = listSub.iterator();
+                        while (iterator.hasNext()) {
+                            Map next = (Map) iterator.next();
+                            Myfavorite myfavorite = new Myfavorite();
+                            String userName = (String) next.get("user_name");
+                            String headuUrl = (String) next.get("headurl");
+                            String userText = (String) next.get("user_text");
+                            String userId = (String) next.get("user_id");
+                            myfavorite.setKsAnchorName(userName);
+                            myfavorite.setKsAnchorId(userId);
+                            myfavorite.setKsAnchorHeaderUrl(headuUrl);
+                            myfavorite.setDescription(userText);
+                            myfavorite.setUpdateTime(new Date());
+
+                            listForInsert.add(myfavorite);
+                        }
+                        if (listForInsert.size() == 0) {
+                            logger.error("配置文件里没有shortVideoCookie的值，请重新输入shortVideoCookie:{}", listForInsert);
+                            return 0;
+                        } else {
+                            //入库 最后返回执行完list的总数
+                            //这里 insertMyfavoriteCount 为受影响的的行数。实际的插入数量值应该是 insertMyfavoriteCount/2
+                            int insertMyfavoriteCount = myfavoriteMapper.insertMyfavoriteByList(listForInsert);
+                            if (insertMyfavoriteCount > 0) {
+                                if (allDataSize > 0) {
+                                    m[0] = m[0] + insertMyfavoriteCount / 2;
+                                    logger.info("insertMyfavoriteByList成功插入：{}条数据", insertMyfavoriteCount / 2);
+                                    logger.info("已经插入：{}条数据", m[0]);
+                                }else {
+                                    m[0] = m[0] + insertMyfavoriteCount ;
+                                    logger.info("insertMyfavoriteByList成功插入：{}条数据", insertMyfavoriteCount);
+                                    logger.info("已经插入：{}条数据", m[0]);
+                                }
+                            } else {
+                                logger.error("insertMyfavoriteByList插入数据失败");
+                            }
+                        }
+                        return 1;
+                    }
+                };
+                // 这里提交的任务容器列表和返回的Future列表存在顺序对应的关系
+                tasks.add(task);
+            }
+
+            List<Future<Integer>> results = null;
+            try {
+                //设置超时时间 5s
+                results = exec.invokeAll(tasks, 5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (results != null){
+                //关闭线程池 发现shutdown()执行后线程未关闭，故使用shutdownNow()
+                exec.shutdown();
+//                exec.shutdownNow();
+                logger.info("线程任务执行结束");
+                logger.info("执行任务消耗了 ：" + (System.currentTimeMillis() - start) + "毫秒");
+
+            }else{
+                logger.error("出错了。");
+                return 0;
+            }
+        }
+        logger.info("end executeAsync");
+        logger.info("任务执行完成,总耗时 ：" + (System.currentTimeMillis() - startTotalTime) + "毫秒");
+        return m[0];
+    }
+
+    @Override
+    public boolean updateMyfavoriteByAnchorId(Myfavorite myfavorite) {
+        return myfavoriteMapper.updateMyfavoriteByAnchorId(myfavorite);
+    }
+
+    @Override
+    public boolean updateIsMyfavoriteByAnchorId(Myfavorite myfavorite) {
+        return myfavoriteMapper.updateIsMyfavoriteByAnchorId(myfavorite);
+    }
+
+    @Override
+    public boolean deleteMyfavoriteByid(String anchorId) {
+        return myfavoriteMapper.deleteMyfavoriteByid(anchorId);
+    }
+
+    /**
+     * 通过AnchorId 更新或插入主播数据
+     * @param inputKsAnchorId
+     * @return
+     */
+    public Result addOrUpdateAllMyfavorite(String inputKsAnchorId) {
+        Myfavorite myfavoriteByAnchorId = null;
+        if (StringUtils.isNotBlank(inputKsAnchorId)) {
+            myfavoriteByAnchorId = getMyfavoriteByAnchorId(inputKsAnchorId);
+        } else {
+            logger.error("请输入要查询的用户id：{}", inputKsAnchorId);
+            return Result.error().message("请输入要查询的用户id");
+        }
+        if (myfavoriteByAnchorId != null) {
+            //有该用户，执行update 操作
+            //用爬虫获取用户信息
+            KuaishouLiveKit kuaishouLiveKit = new KuaishouLiveKit();
+            String s = kuaishouLiveKit.myFavoriteCrawlerByAnchorId(inputKsAnchorId);
+
+            if (StringUtils.isNotBlank(s)) {
+                if (!s.contains("error")) {
+                    JSONObject profileJsonObject = JSONObject.parseObject(s).getJSONObject("data").getJSONObject("visionProfile").getJSONObject("userProfile").getJSONObject("profile");
+                    String userName = profileJsonObject.getString("user_name");
+                    String userId = profileJsonObject.getString("user_id");
+                    String headUrl = profileJsonObject.getString("headurl");
+                    String userText = profileJsonObject.getString("user_text");
+
+                    Myfavorite myfavorite = new Myfavorite();
+                    myfavorite.setKsAnchorName(userName);
+                    myfavorite.setKsAnchorId(userId);
+                    myfavorite.setKsAnchorHeaderUrl(headUrl);
+                    myfavorite.setDescription(userText);
+                    myfavorite.setUpdateTime(NowDateUtils.getDaDate());
+
+                    boolean b = updateMyfavoriteByAnchorId(myfavorite);
+                    if (b) {
+                        logger.info("用户更新成功:{}", myfavorite);
+                        return Result.ok().message("用户:" + inputKsAnchorId + ",更新成功");
+                    } else {
+                        logger.error("用户更新失败:{}", myfavorite);
+                        return Result.error().message("用户:" + inputKsAnchorId + ",更新失败");
+                    }
+                } else {
+                    logger.error("读取列表失败:{}", s);
+                    return Result.error().message("帐号异常，请重新登录");
+                }
+            } else {
+                logger.error("读取列表失败:{}", s);
+                return Result.error().message("帐号异常，请重新登录");
+            }
+        } else {
+            //否则执行插入操作
+            KuaishouLiveKit kuaishouLiveKit = new KuaishouLiveKit();
+            String s = kuaishouLiveKit.myFavoriteCrawlerByAnchorId(inputKsAnchorId);
+            if (StringUtils.isNotBlank(s)) {
+                if (!s.contains("error")) {
+                    JSONObject profileJsonObject = JSONObject.parseObject(s).getJSONObject("data").getJSONObject("visionProfile").getJSONObject("userProfile").getJSONObject("profile");
+                    String userName = profileJsonObject.getString("user_name");
+                    String userId = profileJsonObject.getString("user_id");
+                    String headUrl = profileJsonObject.getString("headurl");
+                    String userText = profileJsonObject.getString("user_text");
+
+                    Myfavorite myfavorite = new Myfavorite();
+                    myfavorite.setKsAnchorName(userName);
+                    myfavorite.setKsAnchorId(userId);
+                    myfavorite.setKsAnchorHeaderUrl(headUrl);
+                    myfavorite.setDescription(userText);
+//                    myfavorite.setMyfavorite(true);
+
+                    boolean b = insertMyfavorite(myfavorite);
+                    if (b) {
+                        logger.info("用户添加成功:{}", myfavorite);
+                        return Result.ok().message("用户:" + inputKsAnchorId + ",添加成功");
+                    } else {
+                        logger.error("用户添加失败:{}", myfavorite);
+                        return Result.error().message("用户:" + inputKsAnchorId + ",添加失败");
+                    }
+                } else {
+                    logger.error("读取列表失败:{}", s);
+                    return Result.error().message("帐号异常，请重新登录");
+                }
+            } else {
+                logger.error("读取列表失败:{}", s);
+                return Result.error().message("帐号异常，请重新登录");
+            }
+        }
+    }
+
+    /**
+     * 通过list批量更新主播数据
+     * @return
+     */
+    public Result addMyfavoriteList() {
+        int myFollowCount = 0;
+        //先去更新我的信息，获取我最新的关注总数，赋值给
+        boolean b = myInfoService.insertOrUpdateMyInfo();
+        if (b) {
+            logger.info("更新用户数据成功");
+        } else {
+            logger.error("更新用户数据失败");
+            return Result.error().message("更新用户数据失败");
+        }
+        MyInfo myInfo = myInfoService.getMyInfo();
+        if (myInfo != null) {
+            myFollowCount = myInfo.getMyFollow();
+            logger.info("查询自己信息成功：{}", myInfo);
+        } else {
+            logger.error("查询自己信息失败：{}", myInfo);
+            return Result.error().message("查询自己信息失败");
+        }
+        Integer insertMyfavoriteCount = insertMyfavoriteByList(myFollowCount);
+        if (insertMyfavoriteCount > 0) {
+            logger.info("更新数据成功，一共插入：{}条数据", insertMyfavoriteCount);
+            return Result.ok().message("更新数据成功");
+        } else {
+            logger.warn("更新数据失败");
+            return Result.error().message("更新数据失败");
+        }
+    }
+
+    /**
+     * 添加主播到特别关注
+     * @param inputKsAnchorId
+     * @param inputIsMyfavorite
+     * @return
+     */
+    public Result updateIsMyfavorite(String inputKsAnchorId,boolean inputIsMyfavorite) {
+        if (StringUtils.isBlank(inputKsAnchorId)) {
+            logger.error("主播用户id不能为空");
+            return Result.error().message("主播用户id不能为空");
+        } else {
+            Myfavorite myfavorite = new Myfavorite();
+            myfavorite.setKsAnchorId(inputKsAnchorId);
+            myfavorite.setUpdateTime(NowDateUtils.getDaDate());
+            myfavorite.setMyfavorite(inputIsMyfavorite);
+            boolean b = updateIsMyfavoriteByAnchorId(myfavorite);
+            if (b) {
+                logger.info("成功添加主播到我的特别关注");
+                return Result.ok().message("成功添加主播到我的特别关注");
+            } else {
+                logger.error("添加主播到我的特别关注失败");
+                return Result.error().message("添加主播到我的特别关注失败");
+            }
+        }
+    }
+}

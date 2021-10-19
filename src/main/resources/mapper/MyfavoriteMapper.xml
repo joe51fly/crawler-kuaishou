@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.joe.kuaishou.mapper.MyfavoriteMapper">
+
+    <select id="getMyfavorite" resultType="myfavorite" parameterType="Integer">
+        select * from ks_myfavorite_info where id = #{id}
+    </select>
+
+    <select id="getMyfavoriteByAnchorId" resultType="myfavorite" parameterType="String">
+        select * from ks_myfavorite_info where ks_anchor_id = #{ksAnchorId}
+    </select>
+
+    <select id="getAll" resultType="myfavorite">
+        select * from ks_myfavorite_info
+    </select>
+
+    <select id="getMyfavoriteByIsMyfavorite" resultType="myfavorite">
+        select * from ks_myfavorite_info where is_myfavorite=#{isMyfavorite};
+    </select>
+
+    <insert id="insertMyfavorite" parameterType="myfavorite" useGeneratedKeys="true" keyProperty="id">
+        insert into ks_myfavorite_info(ks_anchor_name,ks_anchor_id,ks_anchor_header_url,description,is_myfavorite)
+        values (#{ksAnchorName},#{ksAnchorId},#{ksAnchorHeaderUrl},#{description},#{isMyfavorite})
+    </insert>
+<!--    <insert id="insertOrUpdateKsLiveMyfavoriteById" parameterType="ksLiveMyfavorite" useGeneratedKeys="true" keyProperty="id">-->
+<!--        insert into ks_live_myfavorite(id,ks_anchor_name,ks_anchor_id,ks_anchor_header_url,description,is_myfavorite)-->
+<!--        values (#{id},#{ksAnchorName},#{ksAnchorId},#{ksAnchorHeaderUrl},#{description},#{isMyfavorite})-->
+<!--        on duplicate key update ks_anchor_name=#{ksAnchorName},ks_anchor_id=#{ksAnchorId},ks_anchor_header_url=#{ksAnchorHeaderUrl},description=#{description},is_myfavorite=#{isMyfavorite};-->
+<!--    </insert>-->
+
+    <insert id="insertMyfavoriteByList" parameterType="List">
+        insert into ks_myfavorite_info
+        (ks_anchor_name ,ks_anchor_id ,ks_anchor_header_url ,description,update_time)
+        values
+        <foreach collection="list" index="index" item="i" separator=",">
+            (#{i.ksAnchorName},#{i.ksAnchorId},#{i.ksAnchorHeaderUrl},#{i.description},#{i.updateTime})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        ks_anchor_id=VALUES(ks_anchor_id),
+        ks_anchor_name=VALUES(ks_anchor_name),
+        ks_anchor_header_url=VALUES(ks_anchor_header_url),
+        description=VALUES(description),
+        update_time=VALUES(update_time)
+    </insert>
+
+    <update id="updateMyfavoriteByAnchorId">
+        update ks_myfavorite_info
+        <set>
+            <if test="ksAnchorName != null">
+                ks_anchor_name = #{ksAnchorName},
+            </if>
+            <if test="ksAnchorHeaderUrl != null">
+                ks_anchor_header_url = #{ksAnchorHeaderUrl},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="isMyfavorite != null">
+                is_myfavorite = #{isMyfavorite},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where ks_anchor_id = #{ksAnchorId}
+    </update>
+    
+    <update id="updateIsMyfavoriteByAnchorId" parameterType="myfavorite">
+        update ks_myfavorite_info
+        <set>
+            <if test="isMyfavorite != null">
+                is_myfavorite = #{isMyfavorite},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where ks_anchor_id = #{ksAnchorId};
+    </update>
+
+    <delete id="deleteMyfavoriteByid">
+        delete from ks_myfavorite_info where id = #{ksAnchorId}
+    </delete>
+</mapper>

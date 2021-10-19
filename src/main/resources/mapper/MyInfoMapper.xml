@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.joe.kuaishou.mapper.MyInfoMapper">
+
+    <select id="getMyInfo" resultType="myInfo">
+        select * from my_info
+    </select>
+
+    <insert id="insertMyInfo" parameterType="myInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into my_info(my_name, my_id, my_avatar, my_eid, my_user_id,my_fans,my_follow)
+        values (#{myName},#{myId},#{myAvatar},#{myEid},#{myUserId},#{myFans},#{myFollow})
+    </insert>
+
+    <update id="updateMyInfo">
+        update my_info
+        <set>
+            <if test="myName != null">
+                my_name = #{myName},
+            </if>
+            <if test="myId != null">
+                my_id = #{myId},
+            </if>
+            <if test="myAvatar != null">
+                my_avatar = #{myAvatar},
+            </if>
+            <if test="myUserId != null">
+                my_user_id = #{myUserId},
+            </if>
+            <if test="myFans != null">
+                my_fans = #{myFans},
+            </if>
+            <if test="myFollow != null">
+                my_follow = #{myFollow},
+            </if>
+        </set>
+        where my_eid = #{myEid}
+    </update>
+</mapper>

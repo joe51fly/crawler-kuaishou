@@ -1,182 +1,243 @@
 package com.joe.kuaishou.contraller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.joe.kuaishou.bean.KsLiveMyfavorite;
 import com.joe.kuaishou.common.Result;
-import com.joe.kuaishou.service.KsLiveMyfavoriteService;
+import com.joe.kuaishou.service.MyInfoService;
+import com.joe.kuaishou.service.MyfavoriteLiveService;
+import com.joe.kuaishou.service.MyfavoriteService;
+import com.joe.kuaishou.tools.thread.InsertMyfavoriteLiveInfoRunnable;
 import com.joe.kuaishou.tools.KuaishouLiveKit;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
+import java.util.*;
 
 @Controller
 @CrossOrigin
 @RequestMapping(value = "/ks", method = RequestMethod.POST)
+@ResponseBody
 public class KsContraller {
     private static final Logger logger = LoggerFactory.getLogger(KsContraller.class);
     private static final String ksProfilePath = "ksProfile.properties";
-    //存这次请求的Pcursor值，待请求下一页的时候要用
-//    private String pcursor = "";
-    @Autowired
-    KsLiveMyfavoriteService ksLiveMyfavoriteService;
 
+    @Autowired
+    MyfavoriteService myfavoriteService;
+    @Autowired
+    MyInfoService myInfoService;
+    @Autowired
+    MyfavoriteLiveService myfavoriteLiveService;
+
+    /**
+     * @apiDescription 获取我关注的主播正在直播的数据列表
+     * @api {POST} /data
+     * @apiGroup KsContraller
+     * @apiHeader {String} callback=a
+     * @apiParam {String} callback 随便什么字符都行
+     * @apiSuccessExample {json} 成功响应:
+     * {
+     *   "success": true,
+     *   "code": 20000,
+     *   "message": "成功",
+     *   "data": {
+     *     "result": 1,
+     *     "host-name": "bjrz-rs2123.lf",
+     *     "follow": [
+     *       {
+     *         "watchingCount": "0",
+     *         "rtCoverUrl": "https://live2.static.yximgs.com/live/game/screenshot/4SLhBtIwqZ4~1626772614861~1",
+     *         "playUrls": [
+     *           {
+     *             "freeTrafficCdn": false,
+     *             "pushCdn": "OriginMainApp",
+     *             "cdnIp": null,
+     *             "ipValidTime": null,
+     *             "cdn": "Tencent",
+     *             "url": "https://tx-origin.pull.yximgs.com/gifshow/4SLhBtIwqZ4_ma1500.flv?txSecret=ee05382b9a0661abc7bf35f5135f45e8&txTime=60f7e651&stat=Sp2EG8%2BUDQbBDUxqvLx2RhV8FDJW%2FMfKRjTQMuQ6S9sVOT5LXOWzkXPLMCABg7eR&tsc=origin&oidc=txhb"
+     *           }
+     *         ],
+     *         "hlsPlayUrl": "https://bd-origin.hlspull.yximgs.com/gifshow/4SLhBtIwqZ4_ma1500.m3u8?wsTime=1626859089&wsSecret=f2f98ded35b462e515999c290671b155&tsc=origin&oidc=txhbtsc=origin",
+     *         "gameInfo": {
+     *           "gameId": 0,
+     *           "coverUrl": "",
+     *           "name": "其他",
+     *           "type": 0,
+     *           "category": "QT"
+     *         },
+     *         "caption": "等你来",
+     *         "likeCount": "0",
+     *         "exp_tag": "1_v/0_unknown0",
+     *         "privateLive": false,
+     *         "coverUrl": "https://tx2.a.yximgs.com/uhead/AB/2021/07/20/17/BMjAyMTA3MjAxNzEzMjRfOTMyMzY5NTAwXzgzMzU0NjQwODVfbHY=.jpg",
+     *         "coverHeight": 1920,
+     *         "liveWish": true,
+     *         "serverExpTag": "feed_live|4SLhBtIwqZ4|932369500|1_v/0_unknown0",
+     *         "ext_params": {
+     *           "color": "201C19",
+     *           "w": 1080,
+     *           "h": 1920
+     *         },
+     *         "liveStreamId": "4SLhBtIwqZ4",
+     *         "coverWidth": 1080,
+     *         "startTime": 1626772402219,
+     *         "revenueRankWinnerIcon": [],
+     *         "user": {
+     *           "eid": "3x59tkbj2kecvgi",
+     *           "user_name": "🕊紫～霞🕊💕",
+     *           "verified": false,
+     *           "headurl": "https://tx2.a.yximgs.com/uhead/AB/2021/04/14/09/BMjAyMTA0MTQwOTAzNDdfOTMyMzY5NTAwXzFfaGQ2MjVfNjky_s.jpg",
+     *           "headurls": [
+     *             {
+     *               "cdn": "tx2.a.yximgs.com",
+     *               "url": "https://tx2.a.yximgs.com/uhead/AB/2021/04/14/09/BMjAyMTA0MTQwOTAzNDdfOTMyMzY5NTAwXzFfaGQ2MjVfNjky_s.jpg"
+     *             },
+     *             {
+     *               "cdn": "ali2.a.yximgs.com",
+     *               "url": "https://ali2.a.yximgs.com/uhead/AB/2021/04/14/09/BMjAyMTA0MTQwOTAzNDdfOTMyMzY5NTAwXzFfaGQ2MjVfNjky_s.jpg"
+     *             }
+     *           ],
+     *           "principalId": "3x59tkbj2kecvgi",
+     *           "isFavorited": false,
+     *           "visitorBeFollowed": false,
+     *           "user_sex": "F",
+     *           "user_id": 932369500,
+     *           "following": true,
+     *           "user_text": "感谢快手官方提供平台❤️\n\n感谢大家关注与支持🍻🍻🍻\n\n大号M894562008:谢谢大家关注🙏🙏🙏",
+     *           "live": false
+     *         },
+     *         "landscape": false
+     *       }
+     *     ]
+     *   }
+     * }
+     * @apiVersion 1.0.0
+     */
     @PostMapping(value = "/data")
-    @ResponseBody
     public Result ksData(@RequestParam(name = "callback") String callback) {
         KuaishouLiveKit kslk = new KuaishouLiveKit();
-        HashMap<String, String> ksProfileMap = kslk.readProperties(ksProfilePath);
-        String userAgent = ksProfileMap.get("userAgent");
-        String originalLiveUrl = ksProfileMap.get("originalLiveUrl");
-        String liveCookie = ksProfileMap.get("liveCookie");
-        String livePythonPath = ksProfileMap.get("livePythonPath");
-        String _cookie = "";
-        if (StringUtils.isNotBlank(liveCookie)) {
-            _cookie = liveCookie;
+        Result result = kslk.myfavoriteLiveAllData();
+        if (result.getSuccess()) {
+            Thread thread = new Thread(new InsertMyfavoriteLiveInfoRunnable(),"InsertMyfavoriteLive");
+            thread.start();
+            return Result.ok().data(result.getData());
         } else {
-            logger.warn("配置文件里没有liveCookie的值，请重新输入liveCookie");
-            return Result.error().message("配置文件里没有直播Cookie的值，请重新输入直播Cookie.");
-//            return callback+" ("+"{\"error_msg\":\"配置文件里没有直播Cookie的值，请重新输入直播Cookie.\"}"+")";
+            return Result.error().message(result.getMessage());
         }
-        String headers = "{'User-Agent': " + "\'" + userAgent + "\'" + ",'Cookie': " + "\'" + _cookie + "\'" + "}";
-        String s = kslk.KsCrawlerKit(headers, null, originalLiveUrl, livePythonPath);
-
-        if (StringUtils.isNotBlank(s)) {
-            if (s.contains("hlsPlayUrl")) {
-                return Result.ok().data("result", s);
-            } else {
-                logger.error("读取列表失败:{}", s);
-                return Result.error().message("帐号异常，请重新登录");
-//                return callback+" ("+"{\"error_msg\":\"帐号异常，请重新登录.\", \"tip\":\"如果是第一次登录,请输入正确的Cookie。不是第一次,请直接F5,会根据上次输入的Cookie登录\"}"+")";
-            }
-        }
-        logger.error("返回数据是null才会打印这句话，请查找原因s:{}", s);
-        return Result.error().message("帐号异常，请重新登录");
-//        return callback+" ("+"{\"error_msg\":\"帐号异常，请重新登录.\", \"tip\":\"如果是第一次登录,请输入正确的Cookie。不是第一次,请直接F5,会根据上次输入的Cookie登录\"}"+")";
     }
 
+    /**
+     * @apiDescription 获取我点过赞的短视频
+     * @api {POST} /myLikeData
+     * @apiGroup KsContraller
+     * @apiHeader {String} callback=a
+     * @apiHeader {String} pcursor=0,30,60,90
+     * @apiParam {String} callback 随便什么字符都行
+     * @apiParam {String} pcursor 数据的页数 例子：0,30,60,90
+     * @apiParamExample {json} 请求示例:
+     * {
+     * }
+     * @apiSuccessExample {json} 成功响应:
+     * {
+     * "success": true,
+     * "code": 20000,
+     * "message": "成功",
+     * "data": {
+     * "data": {
+     * "visionProfileLikePhotoList": {
+     * "result": 1,
+     * "hostName": null,
+     * "webPageArea": "profilexxnull",
+     * "__typename": "VisionProfilePhotoList",
+     * "feeds": [
+     * {
+     * "currentPcursor": "",
+     * "author": {
+     * "following": true,
+     * "__typename": "Author",
+     * "name": "单身荟舞",
+     * "id": "3xa7ieagzqqfbce",
+     * "headerUrl": "https://ali2.a.yximgs.com/uhead/AB/2021/05/05/20/BMjAyMTA1MDUyMDM4MTJfMTQxNzgxOTA0NV8yX2hkMTU3XzcwMg==_s.jpg",
+     * "headerUrls": null
+     * },
+     * "__typename": "Feed",
+     * "photo": {
+     * "videoRatio": 0.5625,
+     * "photoUrls": [
+     * {
+     * "__typename": "Url",
+     * "cdn": "v2.kwaicdn.com",
+     * "url": "https://v2.kwaicdn.com/upic/2021/07/20/15/BMjAyMTA3MjAxNTM4NDNfMTQxNzgxOTA0NV81MzYxMjUzOTAwOV8yXzM=_b_Bf718b2eb94ade6dffd20c8c331138c6e.mp4?pkey=AAUS4fzoLNv0hWpByZu2S2UcC6pSpY-C9-n5oniAW6YJAulNP5Gcu9GRxA8A77Gz_LSZFeBZYzfDI2rzEjdq88944KZYonae0IFnDhYZ-KidtxGOSEf0-24B9uyJGLC2CuM&tag=1-1626772982-unknown-0-4vy8qicugy-645f6c1fb0c004ea&clientCacheKey=3xm3cui2nmctgmc_b.mp4&tt=b&di=de5ba63c&bp=14764"
+     * },
+     * {
+     * "__typename": "Url",
+     * "cdn": "v3.kwaicdn.com",
+     * "url": "https://v3.kwaicdn.com/upic/2021/07/20/15/BMjAyMTA3MjAxNTM4NDNfMTQxNzgxOTA0NV81MzYxMjUzOTAwOV8yXzM=_b_Bf718b2eb94ade6dffd20c8c331138c6e.mp4?pkey=AAXBhN-7cV_7eQ9lJd_t4D73avLXvGToCVe8-2q8ZcGd67ZmUgKL7kcvrrE38n14MN87U1rIrEf-ZECHUJ6z2kNtfM7VTNekB9_YAjTNNQO5FI4QNqxcKci6U9qzPB09Tc8&tag=1-1626772982-unknown-1-lz6qr0djri-eecd4a5d9f2958b0&clientCacheKey=3xm3cui2nmctgmc_b.mp4&tt=b&di=de5ba63c&bp=14764"
+     * }
+     * ],
+     * "__typename": "PhotoEntity",
+     * "stereoType": 0,
+     * "caption": "#日出东方落于西 朝思暮想念于你 #",
+     * "likeCount": "184",
+     * "realLikeCount": 184,
+     * "animatedCoverUrl": "https://ali2.a.yximgs.com/upic/2021/07/20/15/BMjAyMTA3MjAxNTM4NDNfMTQxNzgxOTA0NV81MzYxMjUzOTAwOV8yXzM=_animatedV5_B0ea1cdff6bc59e9e3494042017eceba3.webp?tag=1-1626772982-unknown-0-mw3ehoe9qs-eaf634b622f5d643&clientCacheKey=3xm3cui2nmctgmc_animatedV5.webp&di=de5ba63c&bp=14764",
+     * "liked": true,
+     * "duration": 8100,
+     * "coverUrl": "https://ali2.a.yximgs.com/upic/2021/07/20/15/BMjAyMTA3MjAxNTM4NDNfMTQxNzgxOTA0NV81MzYxMjUzOTAwOV8yXzM=_Bcba4bc4be92b95c3fd1e9523fb7fdfbc.jpg?tag=1-1626772982-unknown-0-bauf2cwiuf-f1fb5933485ca9f4&clientCacheKey=3xm3cui2nmctgmc.jpg&di=de5ba63c&bp=14764",
+     * "photoUrl": "https://v2.kwaicdn.com/upic/2021/07/20/15/BMjAyMTA3MjAxNTM4NDNfMTQxNzgxOTA0NV81MzYxMjUzOTAwOV8yXzM=_b_Bf718b2eb94ade6dffd20c8c331138c6e.mp4?pkey=AAUS4fzoLNv0hWpByZu2S2UcC6pSpY-C9-n5oniAW6YJAulNP5Gcu9GRxA8A77Gz_LSZFeBZYzfDI2rzEjdq88944KZYonae0IFnDhYZ-KidtxGOSEf0-24B9uyJGLC2CuM&tag=1-1626772982-unknown-0-4vy8qicugy-645f6c1fb0c004ea&clientCacheKey=3xm3cui2nmctgmc_b.mp4&tt=b&di=de5ba63c&bp=14764",
+     * "expTag": "1_a/2001798988773139361_xpcwebprofilexxnull0",
+     * "id": "3xm3cui2nmctgmc",
+     * "coverUrls": null,
+     * "timestamp": 1626766739545
+     * },
+     * "llsid": "2001798988773139361",
+     * "canAddComment": 0,
+     * "type": 1,
+     * "tags": [
+     * {
+     * "__typename": "Tag",
+     * "name": "日出东方落于西",
+     * "type": 1
+     * }
+     * ],
+     * "status": 1
+     * },
+     * }
+     * }
+     * @apiVersion 1.0.0
+     */
     @PostMapping(value = "/myLikeData")
-    @ResponseBody
-    public Result ksMyLikeData(@RequestParam(name = "callback") String callback,@RequestParam(name = "pcursor") String pcursor) {
+    public Result ksMyLikeData(@RequestParam(name = "callback") String callback, @RequestParam(name = "pcursor") String pcursor) {
         KuaishouLiveKit kslk = new KuaishouLiveKit();
-        HashMap<String, String> ksProfileMap = kslk.readProperties(ksProfilePath);
-        String userAgent = ksProfileMap.get("userAgent");
-        String originalPostUrl = ksProfileMap.get("originalPostUrl");
-        String shortVideoHost = ksProfileMap.get("shortVideoHost");
-        String shortVideoCookie = ksProfileMap.get("shortVideoCookie");
-        String contentType = ksProfileMap.get("contentType");
-        String myLikePythonPath = ksProfileMap.get("myLikePythonPath");
-        String shortVideoMyLikePayload = null;
-        if (StringUtils.isBlank(pcursor)) {
-            //        String shortVideoMyLikePayload = "{'operationName':'visionProfileLikePhotoList','variables':{'pcursor':'','page':'profile'},'query':'query visionProfileLikePhotoList($pcursor: String, $page: String, $webPageArea: String) {\n  visionProfileLikePhotoList(pcursor: $pcursor, page: $page, webPageArea: $webPageArea) {\n    result\n    llsid\n    webPageArea\n    feeds {\n      type\n      author {\n        id\n        name\n        following\n        headerUrl\n        headerUrls {\n          cdn\n          url\n          __typename\n        }\n        __typename\n      }\n      tags {\n        type\n        name\n        __typename\n      }\n      photo {\n        id\n        duration\n        caption\n        likeCount\n        realLikeCount\n        coverUrl\n        coverUrls {\n          cdn\n          url\n          __typename\n        }\n        photoUrls {\n          cdn\n          url\n          __typename\n        }\n        photoUrl\n        liked\n        timestamp\n        expTag\n        animatedCoverUrl\n        stereoType\n        videoRatio\n        __typename\n      }\n      canAddComment\n      currentPcursor\n      llsid\n      status\n      __typename\n    }\n    hostName\n    pcursor\n    __typename\n  }\n}\n'}";
-            shortVideoMyLikePayload = "{'operationName':'visionProfileLikePhotoList','variables':{'pcursor':'','page':'profile'},'query':'query visionProfileLikePhotoList($pcursor: String, $page: String, $webPageArea: String) {   visionProfileLikePhotoList(pcursor: $pcursor, page: $page, webPageArea: $webPageArea) {     result     llsid     webPageArea     feeds {       type       author {         id         name         following         headerUrl         headerUrls {           cdn           url           __typename         }         __typename       }       tags {         type         name         __typename       }       photo {         id         duration         caption         likeCount         realLikeCount         coverUrl         coverUrls {           cdn           url           __typename         }         photoUrls {           cdn           url           __typename         }         photoUrl         liked         timestamp         expTag         animatedCoverUrl         stereoType         videoRatio         __typename       }       canAddComment       currentPcursor       llsid       status       __typename     }     hostName     pcursor     __typename   } } '}";
+        Result result = kslk.ksMyLikeShortVideoData(pcursor);
+        if (result.getSuccess()) {
+            return Result.ok().data(result.getData());
         } else {
-            shortVideoMyLikePayload = "{'operationName':'visionProfileLikePhotoList','variables':{'pcursor':" + pcursor + ",'page':'profile'},'query':'query visionProfileLikePhotoList($pcursor: String, $page: String, $webPageArea: String) {   visionProfileLikePhotoList(pcursor: $pcursor, page: $page, webPageArea: $webPageArea) {     result     llsid     webPageArea     feeds {       type       author {         id         name         following         headerUrl         headerUrls {           cdn           url           __typename         }         __typename       }       tags {         type         name         __typename       }       photo {         id         duration         caption         likeCount         realLikeCount         coverUrl         coverUrls {           cdn           url           __typename         }         photoUrls {           cdn           url           __typename         }         photoUrl         liked         timestamp         expTag         animatedCoverUrl         stereoType         videoRatio         __typename       }       canAddComment       currentPcursor       llsid       status       __typename     }     hostName     pcursor     __typename   } } '}";
-        }
-        String _cookie = "";
-        if (StringUtils.isNotBlank(shortVideoCookie)) {
-            _cookie = shortVideoCookie;
-        } else {
-            logger.warn("配置文件里没有shortVideoCookie的值，请重新输入shortVideoCookie");
-            return Result.error().message("配置文件里没有短视频Cookie的值，请重新输入短视频Cookie.");
-//            return callback+" ("+"{\"error_msg\":\"配置文件里没有短视频Cookie的值，请重新输入短视频Cookie.\"}"+")";
-        }
-//        String headers = "{'User-Agent': " +"\'"+ userAgent +"\'"+",'Cookie':" + "\'"+_cookie+"\'"+",'Content-Type':"+"\'"+contentType+"\'"+",'Host':"+"\'"+shortVideoHost+"\'" + "}";
-        String headers = "{'User-Agent': " + "\'" + userAgent + "\'" + ",'Cookie':" + "\'" + _cookie + "\'" + ",'Content-Type':" + "\'" + contentType + "\'}";
-
-        String s = kslk.KsCrawlerKit(headers, shortVideoMyLikePayload, originalPostUrl, myLikePythonPath);
-
-        if (StringUtils.isNotBlank(s)) {
-            if (s.contains("feeds")) {
-//                ObjectMapper mapper = new ObjectMapper();
-//                mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
-//                    JsonNode jsonNode = mapper.readTree(s);
-//                    map = mapper.readValue(s, Map.class);
-                JSONObject jsonObject = JSONObject.parseObject(s);
-                pcursor = jsonObject.getJSONObject("data").getJSONObject("visionProfileLikePhotoList").getString("pcursor");
-//                JSONObject data = jsonObject.getJSONObject("data");
-//                JSONObject visionProfileUserList = data.getJSONObject("visionProfileLikePhotoList");
-//                pcursor = visionProfileUserList.getString("pcursor");
-
-                //json对象转Map
-                Map<String,Object> map = (Map<String,Object>)jsonObject;
-
-                return Result.ok().data(map);
-//                return callback+" ("+s+")";
-            } else {
-                logger.error("读取列表失败:{}", s);
-                return Result.error().message("帐号异常，请重新登录");
-//                return callback+" ("+"{\"error_msg\":\"帐号异常，请重新登录.\", \"tip\":\"如果是第一次登录,请输入正确的Cookie。不是第一次,请直接F5,会根据上次输入的Cookie登录\"}"+")";
-            }
-        }
-        logger.error("返回数据是null才会打印这句话，请查找原因s:{}", s);
-        return Result.error().message("帐号异常，请重新登录");
-//        return callback+" ("+"{\"error_msg\":\"帐号异常，请重新登录.\", \"tip\":\"如果是第一次登录,请输入正确的Cookie。不是第一次,请直接F5,会根据上次输入的Cookie登录\"}"+")";
-    }
-
-    @PostMapping(value = "/addOrUpdateAllMyfavorite")
-    @ResponseBody
-    public Result addOrUpdateAllMyfavorite(@RequestParam(name = "callback") String callback, @RequestParam(name = "inputKsAnchorId") String inputKsAnchorId) {
-        KsLiveMyfavorite ksLiveMyfavoriteByAnchorId = null;
-        if (StringUtils.isNotBlank(inputKsAnchorId)) {
-            ksLiveMyfavoriteByAnchorId = ksLiveMyfavoriteService.getKsLiveMyfavoriteByAnchorId(inputKsAnchorId);
-        } else {
-            logger.error("请输入要查询的用户id");
-            return Result.error().message("请输入要查询的用户id");
-//            return callback+" ("+"{\"error_msg\":\"请输入要查询的用户id\"}"+")";
-        }
-        if (ksLiveMyfavoriteByAnchorId != null) {
-            //有该用户，执行update 操作
-            ksLiveMyfavoriteByAnchorId.setMyfavorite(true);
-            ksLiveMyfavoriteByAnchorId.setUpdateTime(new Date());
-            boolean b = ksLiveMyfavoriteService.updateKsLiveMyfavoriteByid(ksLiveMyfavoriteByAnchorId);
-            if (b) {
-                logger.info("更新操作执行成功");
-                return Result.ok().message("更新操作执行成功");
-//                return callback+" ("+"{\"info_msg\":\"更新操作执行成功\"}"+")";
-            } else {
-                logger.error("更新操作失败");
-                return Result.error().message("更新操作失败");
-//                return callback+" ("+"{\"error_msg\":\"更新操作失败\"}"+")";
-            }
-        } else {
-            logger.error("应该执行不到这里吧");
-            return Result.error().message("应该执行不到这里吧");
+            return Result.error().message(result.getMessage());
         }
     }
 
-
-    @PostMapping(value = "/addMyfavorite")
-    public Result addMyfavorite(@RequestParam(name = "callback") String callback, @RequestParam(name = "myfavoriteId") String myfavoriteId) {
-        int id = Integer.parseInt(myfavoriteId);
-        KsLiveMyfavorite ksLiveMyfavorite = new KsLiveMyfavorite();
-        ksLiveMyfavorite.setId(id);
-        boolean b = ksLiveMyfavoriteService.updateKsLiveMyfavoriteByid(ksLiveMyfavorite);
-        if (b) {
-            logger.info("更新数据成功");
-            return Result.ok().message("应该执行不到这里吧");
-//            return callback+"("+"{info_msg\":\"更新数据成功.}"+")";
-        } else {
-            logger.warn("更新数据失败");
-            return Result.error().message("更新数据失败");
-//            return callback+"("+"{error_msg\":\"更新数据失败.}"+")";
-        }
-    }
-
-
+    /**
+     * @apiDescription 测试数据
+     * @api {POST} /test/live-data
+     * @apiGroup KsContraller
+     * @apiParam {String} callback 随便什么字符都行
+     * @apiParamExample {json} 请求示例:
+     * {
+     * }
+     * @apiSuccessExample {json} 成功响应:
+     * {
+     *  "success": true,
+     *  "code": 20000,
+     *  "message": "",
+     *  "data": {}
+     * }
+     * @apiVersion 1.0.0
+     */
     @PostMapping(value = "/test/live-data")
-    @ResponseBody
     public Result testKsData(@RequestParam(name = "callback") String callback) throws JsonProcessingException {
         KuaishouLiveKit kslk = new KuaishouLiveKit();
         HashMap<String, String> ksProfileMap = kslk.readProperties(ksProfilePath);
@@ -185,18 +246,7 @@ public class KsContraller {
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         Map map = mapper.readValue(s, Map.class);
         return Result.ok().data(map);
-//        if (StringUtils.isNotBlank(s)){
-//            if (s.contains("hlsPlayUrl")){
-//                return Result.ok().data("result",s);
-//            }else {
-//                logger.error("读取列表失败:{}",s);
-//                return Result.error().message("帐号异常，请重新登录");
-//            }
-//        }
-//        logger.error("返回数据是null才会打印这句话，请查找原因s:{}");
-//        return Result.error().message("帐号异常，请重新登录");
     }
-
 
     @RequestMapping("index")
     public String index() {
