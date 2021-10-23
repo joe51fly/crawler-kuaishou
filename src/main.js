@@ -8,10 +8,14 @@ import 'element-ui/lib/theme-chalk/index.css';
 import $ from 'jquery';
 import {VueJsonp} from 'vue-jsonp';
 import VueResource from 'vue-resource';
+import VueClipboard from 'vue-clipboard2'
+
+
 
 Vue.use(VueResource);
 Vue.use(ElementUI);
 Vue.use(VueJsonp);
+Vue.use(VueClipboard);
 
 Vue.config.productionTip = false
 

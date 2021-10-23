@@ -1,4 +1,4 @@
-// const baseUrl = 'http://192.168.2.14:8080';
+// const bseUrl = 'http://192.168.2.14:8080';
 const baseUrl = 'http://192.168.2.128:8080/ks';
 const flvType = 'video/x-flv';
 const m3u8Type = 'application/x-mpegURL';

@@ -35,6 +35,19 @@
                 <el-dropdown-item v-show="isMySpecialFavorite?true:false"
                                   @click.native="removeMyfavorite(listData.user.user_name,$event,index)">移除
                 </el-dropdown-item>
+                <el-dropdown-item
+                                  @click.native="setIsTop(listData.user.user_name,$event,index)">置顶
+                </el-dropdown-item>
+                <el-dropdown-item
+                                  @click.native="cancelTheTop(listData.user.user_name,$event,index)">取消置顶
+                </el-dropdown-item>
+
+                <el-dropdown-item v-show="theAnchorTopNumber == 9?false:true"
+                                  @click.native="setTheSuperTop(listData.user.user_name,$event,index)">设置超级置顶
+                </el-dropdown-item>
+                <el-dropdown-item v-show="theAnchorTopNumber == 9?true:false"
+                                  @click.native="cancelTheSuperTop(listData.user.user_name,$event,index)">取消超级置顶
+                </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
 
@@ -43,13 +56,14 @@
         <div :id="`videoDivBox${index}`" v-show="isVideoDivBoxShow" class="videoDivBoxClass"></div>
 
         <div v-show="isVideoDivBoxShow">
-          <el-button circle size="small" class="videoClose" type="text"
-                     @click="switchVideoUrl(listData.hlsPlayUrl,listData.playUrls[0].url,$event,index)">切换源
-          </el-button>
-          <el-button circle size="small" class="videoClose" @click="closeVideoPlayer" type="text">关闭</el-button>
-          <!--        <img class='videoClose'  @click="closeVideoPlayer" :src="closeImgPath" />-->
-          <br/>
-          <input type="text" class="playIpt" placeholder="正在播放的视频链接"/>
+          <PlayingVideoOptions :listData="listData"
+                           :myVideoPlayer="myVideoPlayer"
+                           :lastLiItemIdex="lastLiItemIdex"
+                           @changeVideoPlayer="changeMyPlayer"
+                           :theVideoIndex="index"
+                           @switchPlayVideo="switchPlayVideo(arguments)"
+                           :thePlayingVideoUrl="thePlayingVideoUrl"
+          />
         </div>
       </li>
     <div class="hint" v-show="isShowHint">上拉加载，获取更多内容</div>
@@ -58,6 +72,7 @@
 
 <script>
 import $ from 'jquery';
+import PlayingVideoOptions from "../components/PlayingVideoOptions.vue";
 
 let myPlayer;
 
@@ -68,7 +83,9 @@ export default {
     myFavoriteList: [],
     myFavoriteObject: {},
   },
-  components: {},
+  components: {
+    PlayingVideoOptions
+  },
   data() {
     return {
       //项目打包后图片加载不到 所以给前面加上/ks-vue/
@@ -100,13 +117,27 @@ export default {
       isSwitchM3u8: false,
       // theAnchorInfoByEid:String,
       isMySpecialFavorite: Boolean,
+
+      /*主播置顶值，根据大小排序 0-9 0表示未置顶 置顶选项只能设置0-8 9表示超级置顶 */
+      theAnchorTopNumber:Number,
+
+      /*播放视频的对象*/
+      myVideoPlayer:{},
+      /*正在播放的视频链接*/
+      thePlayingVideoUrl:"",
     }
   },
   methods: {
-    switchVideoUrl(liveUrlFromPic, flvUrl, event, index) {
+    /*切换播放的数据源*/
+    switchPlayVideo(params){
       this.isSwitchM3u8 = true;
-      this.$options.methods.liveUrlPicFun.bind(this)(liveUrlFromPic, flvUrl, event, index);
+      this.$options.methods.liveUrlPicFun.bind(this)(params[0], params[1], event, params[2]);
       this.isSwitchM3u8 = false;
+    },
+
+    /*初始化视频播放的对象*/
+    changeMyPlayer(){
+      myPlayer = undefined;
     },
 
     getIsMyfavoriteByEid(user_name, event, index) {
@@ -131,6 +162,7 @@ export default {
         } else if (isMyfavoriteByEidRes.body.success) {
           // console.log("isMySpecialFavorite",isMyfavoriteByEidRes.body.data.result.myfavorite);
           this.isMySpecialFavorite = isMyfavoriteByEidRes.body.data.result.myfavorite;
+          this.theAnchorTopNumber = isMyfavoriteByEidRes.body.data.result.isTop;
         } else {
           this.$message({
             showClose: true,
@@ -223,9 +255,174 @@ export default {
         console.log(mySpecFollowDataRes)
       });
     },
-    /**
-     * 监听页面滚动上拉刷新
-     */
+
+    /*设置置顶*/
+    setIsTop(user_name, event, index) {
+      console.log(this.list[index].user.eid);
+      const eid = this.list[index].user.eid;
+      this.$http.post(baseUrl + '/live/updateForTheTopByIsTop',
+        {
+          inputEid: eid,
+          isSetTop: true,
+        },
+        {
+          emulateJSON: true
+        }).then(res => {
+        // console.log("res:", res);
+        if (res.status !== 200) {
+          this.$message({
+            showClose: true,
+            message: "出问题了，请联系网站管理员查找原因：" + res.status,
+            type: 'error',
+            duration: 10000,
+          });
+        } else if (res.body.success) {
+          this.$message({
+            showClose: true,
+            message: res.body.message,
+            type: 'info',
+            duration: 10000,
+          });
+        } else {
+          this.$message({
+            showClose: true,
+            message: res.body.message,
+            type: 'error',
+            duration: 10000,
+          });
+        }
+      }).catch(function (mySpecFollowDataRes) {
+        //出错处理
+        console.log(mySpecFollowDataRes)
+      });
+    },
+
+    /*设置超级置顶*/
+    setTheSuperTop(user_name, event, index) {
+      // console.log(this.list[index].user.eid);
+      const eid = this.list[index].user.eid;
+      this.$http.post(baseUrl + '/live/updateSuperSet_top',
+        {
+          inputEid: eid,
+          isSetSuper_top: true,
+        },
+        {
+          emulateJSON: true
+        }).then(res => {
+        // console.log("res:", res);
+        if (res.status !== 200) {
+          this.$message({
+            showClose: true,
+            message: "出问题了，请联系网站管理员查找原因：" + res.status,
+            type: 'error',
+            duration: 10000,
+          });
+        } else if (res.body.success) {
+          this.$message({
+            showClose: true,
+            message: res.body.message,
+            type: 'info',
+            duration: 10000,
+          });
+        } else {
+          this.$message({
+            showClose: true,
+            message: res.body.message,
+            type: 'error',
+            duration: 10000,
+          });
+        }
+      }).catch(function (mySpecFollowDataRes) {
+        //出错处理
+        console.log(mySpecFollowDataRes)
+      });
+    },
+
+    /*取消置顶*/
+    cancelTheTop(user_name, event, index) {
+      console.log(this.list[index].user.eid);
+      const eid = this.list[index].user.eid;
+      this.$http.post(baseUrl + '/live/updateForTheTopByIsTop',
+        {
+          inputEid: eid,
+          isSetTop: false,
+        },
+        {
+          emulateJSON: true
+        }).then(res => {
+        // console.log("res:", res);
+        if (res.status !== 200) {
+          this.$message({
+            showClose: true,
+            message: "出问题了，请联系网站管理员查找原因：" + res.status,
+            type: 'error',
+            duration: 10000,
+          });
+        } else if (res.body.success) {
+          this.$message({
+            showClose: true,
+            message: res.body.message,
+            type: 'info',
+            duration: 10000,
+          });
+        } else {
+          this.$message({
+            showClose: true,
+            message: res.body.message,
+            type: 'error',
+            duration: 10000,
+          });
+        }
+      }).catch(function (mySpecFollowDataRes) {
+        //出错处理
+        console.log(mySpecFollowDataRes)
+      });
+    },
+
+    /*取消超级置顶*/
+    cancelTheSuperTop(user_name, event, index) {
+      // console.log(this.list[index].user.eid);
+      const eid = this.list[index].user.eid;
+      this.$http.post(baseUrl + '/live/updateSuperSet_top',
+        {
+          inputEid: eid,
+          isSetSuper_top: false,
+        },
+        {
+          emulateJSON: true
+        }).then(res => {
+        // console.log("res:", res);
+        if (res.status !== 200) {
+          this.$message({
+            showClose: true,
+            message: "出问题了，请联系网站管理员查找原因：" + res.status,
+            type: 'error',
+            duration: 10000,
+          });
+        } else if (res.body.success) {
+          this.$message({
+            showClose: true,
+            message: res.body.message,
+            type: 'info',
+            duration: 10000,
+          });
+        } else {
+          this.$message({
+            showClose: true,
+            message: res.body.message,
+            type: 'error',
+            duration: 10000,
+          });
+        }
+      }).catch(function (mySpecFollowDataRes) {
+        //出错处理
+        console.log(mySpecFollowDataRes)
+      });
+    },
+
+
+
+    /*监听页面滚动上拉刷新*/
     loading() {
       //变量scrollTop是滚动条滚动时，距离顶部的距离
       const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
@@ -259,7 +456,6 @@ export default {
       if (myPlayer !== undefined) {
         if (this.isSwitchM3u8) {
           myPlayer.dispose();/*!//停止*/
-          // $('.playIpt').val(flvUrl);
           $('.playIpt').val(liveUrlFromPic);
         } else {
           $('#videoPlayer').hide();/*!//点击关闭*/
@@ -269,15 +465,12 @@ export default {
           this.$refs.name[this.lastLiItemIdex].childNodes[2].innerHTML = '';
           lastCloseVideoDivImg.css('display', 'none');
           lastLiveImgDiv.css('display', 'block');
-          // $('.playIpt').val(liveUrlFromPic);
           $('.playIpt').val(flvUrl);
         }
       } else {
         if (this.isSwitchM3u8) {
-          // $('.playIpt').val(flvUrl);
           $('.playIpt').val(liveUrlFromPic);
         } else {
-          // $('.playIpt').val(liveUrlFromPic);
           $('.playIpt').val(flvUrl);
         }
       }
@@ -328,7 +521,9 @@ export default {
       thisLiveImgDiv.css('display', 'none');
       thisCloseVideoDivImg.css('display', 'block');
       this.lastLiItemIdex = index;
-      // this.playVideoUrl = liveUrlFromPic;
+      this.myVideoPlayer = myPlayer;
+      console.log("playIpt",$('.playIpt').val());
+      this.thePlayingVideoUrl = $('.playIpt').val();
     },
     inputVideoBtn(event) {
       const inputVideoUrl = $('#inputVideoId').val();
@@ -344,15 +539,6 @@ export default {
         myPlayer.play();
       });
     },
-    closeVideoPlayer() {
-      $('#videoPlayer').hide();/*//隐藏视频播放器*/
-      myPlayer.dispose();/*//停止*/
-      $('#videoDivBox' + this.lastLiItemIdex).css('display', 'none');
-      $('#videoDivBox' + this.lastLiItemIdex + ' + div').css('display', 'none');
-      this.$refs.name[this.lastLiItemIdex].childNodes[2].innerHTML = '';
-      myPlayer = undefined;
-      $('#imgDiv' + this.lastLiItemIdex).css('display', 'block');
-    }
   },
   mounted() {
     //监听页面滑动，执行this.loading函数
@@ -372,12 +558,6 @@ export default {
 </script>
 
 <style>
-.videoClose {
-  margin-top: 1px;
-  margin-bottom: 1px;
-  font-size: medium;
-}
-
 .hint {
   margin-top: 1rem;
 }
@@ -393,10 +573,6 @@ export default {
 
 #inputVideoId {
   width: 16.5rem;
-}
-
-.playIpt {
-  width: 18rem;
 }
 
 #cookieIpt {
