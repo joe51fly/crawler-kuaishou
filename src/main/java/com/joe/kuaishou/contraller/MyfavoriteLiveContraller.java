@@ -226,11 +226,16 @@ public class MyfavoriteLiveContraller {
         myfavoriteLiveInfo.setMyfavorite(inputIsMyfavorite);
         myfavoriteLiveInfo.setUserEid(inputEid);
         myfavoriteLiveInfo.setUpdateTime(NowDateUtils.getDaDate());
+
+        MyfavoriteLiveInfo myfavoriteLiveInfoByEid = myfavoriteLiveService.getMyfavoriteLiveInfoByEid(inputEid);
+        String userName = myfavoriteLiveInfoByEid.getUserName();
+        Map<String, Object> map = new HashMap<>();
+        map.put("userName", userName);
         if (inputIsMyfavorite) {
             boolean b = myfavoriteLiveService.updateIsMyfavoriteLiveInfoByIsMyfavorite(myfavoriteLiveInfo);
             if (b) {
                 logger.info("myfavoriteLiveInfo-添加特别关注成功");
-                return Result.ok().message("添加特别关注成功");
+                return Result.ok().data(map).message("添加特别关注成功");
             } else {
                 logger.error("myfavoriteLiveInfo-添加特别关注失败");
                 return Result.error().message("添加特别关注失败");
@@ -239,7 +244,7 @@ public class MyfavoriteLiveContraller {
             boolean b = myfavoriteLiveService.updateIsMyfavoriteLiveInfoByIsMyfavorite(myfavoriteLiveInfo);
             if (b) {
                 logger.info("myfavoriteLiveInfo-移除特别关注成功");
-                return Result.ok().message("移除特别关注成功");
+                return Result.ok().data(map).message("移除特别关注成功");
             } else {
                 logger.error("myfavoriteLiveInfo-移除特别关注成功");
                 return Result.error().message("移除特别关注成功");
@@ -295,6 +300,79 @@ public class MyfavoriteLiveContraller {
         } else {
             logger.error("库里没有该主播的信息，请添加");
             return Result.error().message("库里没有该主播的信息，请添加");
+        }
+    }
+
+    /**
+     * @apiDescription 在我的特别关注页面，置顶主播或者取消置顶
+     * @api {POST} /updateForTheTopByIsTop
+     * @apiGroup MyfavoriteLiveContraller
+     * @apiName
+     * @apiHeader {String} name=desc
+     * @apiParam {String} inputEid 主播的eid
+     * @apiParam {boolean} isSetTop 是否置顶主播
+     *
+     * @apiParamExample {json} 请求示例:
+     * {
+     *
+     * }
+     * @apiSuccessExample {json} 成功响应:
+     * {
+     *  "success": true,
+     *  "code": 20000,
+     *  "message": "String",
+     *  "data": {}
+     * }
+     * @apiVersion 1.0.0
+     */
+    @PostMapping(value = "/updateForTheTopByIsTop")
+    public Result updateForTheTopByIsTop(@RequestParam(name = "inputEid") String inputEid, @RequestParam(name = "isSetTop") boolean isSetTop){
+        if (StringUtils.isNotBlank(inputEid)){
+            Result result = myfavoriteLiveService.updateForTheTopByIsTop(inputEid, isSetTop);
+            if (result.getSuccess()){
+                return Result.ok().data(result.getData()).message(result.getMessage());
+            }else {
+                return Result.error().message(result.getMessage());
+            }
+        }else {
+            logger.error("主播置顶设置失败:主播eid为空，请检查");
+            return Result.error().message("主播eid为空，请检查");
+        }
+    }
+
+    /**
+     * @apiDescription 设置或者取消 超级置顶
+     * @api {POST} /updateSuperSet_top
+     * @apiGroup MyfavoriteLiveContraller
+     * @apiName
+     * @apiHeader {String} name=desc
+     * @apiParam {String} inputEid 主播的Eid
+     * @apiParam {String} isSetSuper_top 设置或者取消超级置顶
+     *
+     * @apiParamExample {json} 请求示例:
+     * {
+     * }
+     * @apiSuccessExample {json} 成功响应:
+     * {
+     *  "success": true,
+     *  "code": 20000,
+     *  "message": "String",
+     *  "data": {}
+     * }
+     * @apiVersion 1.0.0
+     */
+    @PostMapping(value = "/updateSuperSet_top")
+    public Result updateSuperSet_top(@RequestParam(name = "inputEid") String inputEid, @RequestParam(name = "isSetSuper_top") boolean isSetSuper_top){
+        if (StringUtils.isNotBlank(inputEid)){
+            Result result = myfavoriteLiveService.updateSuperSet_top(inputEid, isSetSuper_top);
+            if (result.getSuccess()){
+                return Result.ok().data(result.getData()).message(result.getMessage());
+            }else {
+                return Result.error().message(result.getMessage());
+            }
+        }else {
+            logger.error("主播置顶设置失败:主播eid为空，请检查");
+            return Result.error().message("主播eid为空，请检查");
         }
     }
 }

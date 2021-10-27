@@ -63,8 +63,19 @@ public interface MyfavoriteLiveService {
      */
     void truncateTemp();
 
-    /*
-        设置为置顶 或者取消置顶
+    /**
+     * 设置为置顶 或者取消置顶
+     * @param userEid
+     * @param isSetTop
+     * @return
      */
-    boolean updateForTheTopByIsTop(MyfavoriteLiveInfo myfavoriteLiveInfo);
+    Result updateForTheTopByIsTop(String userEid,boolean isSetTop);
+
+    /**
+     * 设置或者取消 超级置顶
+     * @param userEid
+     * @param isSetSuper_top
+     * @return
+     */
+    Result updateSuperSet_top(String userEid,boolean isSetSuper_top);
 }

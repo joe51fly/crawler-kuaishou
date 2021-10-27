@@ -291,7 +291,11 @@ public class KuaishouLiveKit {
                 Map.Entry entry = (Map.Entry) entryIterator.next();
                 Object key = entry.getKey();
                 Object value = entry.getValue();
-                properties.setProperty((String) key, (String) value);
+                if (StringUtils.isNotBlank((String)value)){
+                    properties.setProperty((String) key, (String) value);
+                }else {
+                    continue;
+                }
 //                System.out.println(key+":"+value);
             }
             /*//直播数据写入

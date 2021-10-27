@@ -146,7 +146,8 @@
     </insert>
 
     <select id="getMySpecialFollowInfo" resultType="myfavoriteLiveInfo">
-        select t.user_name,
+        select m.is_top,
+               t.user_name,
                t.user_eid,
                t.user_text,
                t.user_id,
@@ -158,9 +159,9 @@
                t.play_urls,
                t.update_time
         from myfavorite_live_info_temp as t
-                 INNER JOIN (select user_eid from myfavorite_live_info where is_myfavorite = true) as m
+                 INNER JOIN (select user_eid,is_top from myfavorite_live_info where is_myfavorite = true) as m
                             on t.user_eid = m.user_eid
-        order by is_top desc
+        order by m.is_top desc
     </select>
 
     <update id="truncateTemp">
@@ -190,4 +191,21 @@
         </set>
         where user_eid = #{userEid}
     </update>
+
+    <update id="updateSuperSet_top" parameterType="myfavoriteLiveInfo">
+        update myfavorite_live_info
+        <set>
+            <if test="isTop != null">
+                is_top = #{isTop},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where user_eid = #{userEid}
+    </update>
+
+
+
+
 </mapper>

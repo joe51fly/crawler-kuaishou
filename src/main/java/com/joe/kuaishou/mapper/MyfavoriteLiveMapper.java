@@ -55,16 +55,23 @@ public interface MyfavoriteLiveMapper {
     List<MyfavoriteLiveInfo> getMySpecialFollowInfo();
 
     List<MyfavoriteLiveInfo> getAllFromTemp();
-
     /**
      * 清空临时表的数据
      * @return
      */
     void truncateTemp();
 
-
-    /*
-        设置为置顶 或者取消置顶
+    /**
+     * 设置为置顶 或者取消置顶
+     * @param myfavoriteLiveInfo
+     * @return
      */
     boolean updateForTheTopByIsTop(MyfavoriteLiveInfo myfavoriteLiveInfo);
+
+    /**
+     * 设置或者取消 超级置顶
+     * @param myfavoriteLiveInfo
+     * @return
+     */
+    boolean updateSuperSet_top(MyfavoriteLiveInfo myfavoriteLiveInfo);
 }

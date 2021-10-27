@@ -7,6 +7,8 @@ import com.joe.kuaishou.common.Result;
 import com.joe.kuaishou.mapper.MyfavoriteLiveMapper;
 import com.joe.kuaishou.service.MyfavoriteLiveService;
 import com.joe.kuaishou.tools.KuaishouLiveKit;
+import com.joe.kuaishou.tools.NowDateUtils;
+import com.sun.org.apache.regexp.internal.RE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,8 +159,8 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
                                 if (insertMyfavoriteCount > 0) {
                                     //第一次插入的时候不用 除以2
                                     if (dbSize > 0) {
-                                        m[0] = m[0] + insertMyfavoriteCount ;
-                                        logger.info("insertMyfavoriteByList成功插入：{}条数据", insertMyfavoriteCount );
+                                        m[0] = m[0] + insertMyfavoriteCount;
+                                        logger.info("insertMyfavoriteByList成功插入：{}条数据", insertMyfavoriteCount);
                                     } else {
                                         m[0] = m[0] + insertMyfavoriteCount;
                                         logger.info("insertMyfavoriteByList成功插入：{}条数据", insertMyfavoriteCount);
@@ -236,24 +238,24 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
 
     @Override
     public Result getNewMySpecialFollowInfo() {
-            //插入数据之前先看临时表有没有上次存留的数据 如果有的话清除数据
-            List<MyfavoriteLiveInfo> allFromTemp = getAllFromTemp();
-            if (allFromTemp.size() > 0) {
-                truncateTemp();
-                logger.info("清除临时表数据操作完成");
-            }
-            Result result = insertMyfavoriteLiveInfoByList(true);
-            if (result.getSuccess()) {
-                logger.info(result.getMessage());
-                List<MyfavoriteLiveInfo> myNewSpecialFollowInfo = getMySpecialFollowInfo();
-                Map<String, Object> map = new HashMap<>();
-                map.put("result", myNewSpecialFollowInfo);
-                logger.info("查询正在直播的特别关注的主播信息成功");
-                return Result.ok().data(map).message("查询正在直播的特别关注的主播信息成功");
-            } else {
-                logger.info(result.getMessage());
-                return Result.error().message(result.getMessage());
-            }
+        //插入数据之前先看临时表有没有上次存留的数据 如果有的话清除数据
+        List<MyfavoriteLiveInfo> allFromTemp = getAllFromTemp();
+        if (allFromTemp.size() > 0) {
+            truncateTemp();
+            logger.info("清除临时表数据操作完成");
+        }
+        Result result = insertMyfavoriteLiveInfoByList(true);
+        if (result.getSuccess()) {
+            logger.info(result.getMessage());
+            List<MyfavoriteLiveInfo> myNewSpecialFollowInfo = getMySpecialFollowInfo();
+            Map<String, Object> map = new HashMap<>();
+            map.put("result", myNewSpecialFollowInfo);
+            logger.info("查询正在直播的特别关注的主播信息成功");
+            return Result.ok().data(map).message("查询正在直播的特别关注的主播信息成功");
+        } else {
+            logger.info(result.getMessage());
+            return Result.error().message(result.getMessage());
+        }
     }
 
     @Override
@@ -267,7 +269,60 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
     }
 
     @Override
-    public boolean updateForTheTopByIsTop(MyfavoriteLiveInfo myfavoriteLiveInfo) {
-        return myfavoriteLiveMapper.updateForTheTopByIsTop(myfavoriteLiveInfo);
+    public Result updateForTheTopByIsTop(String userEid, boolean isSetTop) {
+        MyfavoriteLiveInfo myfavoriteLiveInfoByEid = getMyfavoriteLiveInfoByEid(userEid);
+        String userName = myfavoriteLiveInfoByEid.getUserName();
+        int top = myfavoriteLiveInfoByEid.getIsTop();
+        if (isSetTop) {
+            if (top < 8) {
+                top += 1;
+            }
+        } else {
+            if (top > 0) {
+                top -= 1;
+            } else {
+                top = 0;
+            }
+        }
+        MyfavoriteLiveInfo myfavoriteLiveInfo = new MyfavoriteLiveInfo();
+        myfavoriteLiveInfo.setUserEid(userEid);
+        myfavoriteLiveInfo.setIsTop(top);
+        myfavoriteLiveInfo.setUpdateTime(NowDateUtils.getDaDate());
+        boolean b = myfavoriteLiveMapper.updateForTheTopByIsTop(myfavoriteLiveInfo);
+        Map<String, Object> map = new HashMap<>();
+        map.put("userName", userName);
+        if (b) {
+            logger.info(userName+" 置顶或者取消置顶成功！");
+            return Result.ok().data(map).message("置顶或者取消置顶成功！");
+        } else {
+            logger.error(userName+" 置顶或者取消置顶失败！");
+            return Result.error().message("置顶或者取消置顶失败！");
+        }
+    }
+
+    @Override
+    public Result updateSuperSet_top(String userEid, boolean isSetSuper_top) {
+        MyfavoriteLiveInfo myfavoriteLiveInfoByEid = getMyfavoriteLiveInfoByEid(userEid);
+        String userName = myfavoriteLiveInfoByEid.getUserName();
+        int top = myfavoriteLiveInfoByEid.getIsTop();
+        if (isSetSuper_top) {
+            top = 9;
+        } else {
+            top = 0;
+        }
+        MyfavoriteLiveInfo myfavoriteLiveInfo = new MyfavoriteLiveInfo();
+        myfavoriteLiveInfo.setUserEid(userEid);
+        myfavoriteLiveInfo.setIsTop(top);
+        myfavoriteLiveInfo.setUpdateTime(NowDateUtils.getDaDate());
+        Map<String, Object> map = new HashMap<>();
+        map.put("userName", userName);
+        boolean b = myfavoriteLiveMapper.updateSuperSet_top(myfavoriteLiveInfo);
+        if (b) {
+            logger.info("设置或者取消 " + userName +" 超级置顶 成功！");
+            return Result.ok().data(map).message("设置或者取消 超级置顶 成功！");
+        } else {
+            logger.error("设置或者取消 " + userName + " 超级置顶 失败！");
+            return Result.error().message("设置或者取消 超级置顶 失败！");
+        }
     }
 }
