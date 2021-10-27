@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-button circle size="small" class="videoClose" type="text"
-               @click="switchVideoUrl(listData.hlsPlayUrl,listData.playUrls[0].url,$event,theVideoIndex)">切换源
+               @click="switchVideoUrl(listData.hlsPlayUrl,listData.playUrls[0].url,theVideoIndex)">切换源
     </el-button>
     <el-button circle size="small" class="videoClose" @click="closeVideoPlayer" type="text">关闭</el-button>
     <br/>
@@ -23,7 +23,7 @@ import $ from "jquery";
 let myPlayer;
 
 export default {
-  name:"playInPotplayer",
+  name:"playingVideoOptions",
   props:{
     listData: {
       type:Object
@@ -61,8 +61,9 @@ export default {
       });
     },
 
-    switchVideoUrl(liveUrlFromPic, flvUrl, event, index) {
-      this.$emit("switchPlayVideo",liveUrlFromPic, flvUrl,index);
+    switchVideoUrl(m3u8Url, flvUrl, index) {
+      console.log("hlsPlayUrl",this.listData.hlsPlayUrl);
+      this.$emit("switchPlayVideo",m3u8Url, flvUrl,index);
     },
 
     closeVideoPlayer() {
@@ -71,7 +72,7 @@ export default {
       $('#videoDivBox' + this.lastLiItemIdex).css('display', 'none');
       $('#videoDivBox' + this.lastLiItemIdex + ' + div').css('display', 'none');
       this.$parent.$refs.name[this.lastLiItemIdex].childNodes[2].innerHTML = '';
-      this.$emit("changeVideoPlayer");
+      this.$emit("resetMyPlayer");
       $('#imgDiv' + this.lastLiItemIdex).css('display', 'block');
     }
   },

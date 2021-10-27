@@ -30,7 +30,7 @@
           <el-main>
             <div>
 <!--              <router-view :list="list" :myFavoriteList="myFavoriteList" :myFavoriteObject="myFavoriteObject"></router-view>-->
-              <router-view :list="list"></router-view>
+              <router-view :liveListAllData="list"></router-view>
             </div>
           </el-main>
         </el-container>

@@ -1,10 +1,5 @@
 <template>
   <div align="center">
-
-    <div>
-      <a href="ks-vue://" >调用cmd</a>
-    </div>
-
     <h2 style="color: hotpink">我点赞的视频</h2>
     <br/>
     <li :id="`liId+${index}`" v-for="(myFavorite,index) in myFavoriteListData"
@@ -71,11 +66,6 @@ export default {
     }
   },
   methods: {
-
-    runcmd(){
-
-    },
-
     /**
      * 监听页面滚动上拉刷新
      */
