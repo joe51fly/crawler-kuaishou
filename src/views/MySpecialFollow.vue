@@ -55,13 +55,7 @@ export default {
     liveListAllData: [],
     myFavoriteList: [],
     myFavoriteObject: {},
-    /*切换列表数据*/
-    theMyFollowListdata: [],
-    /*页面标题*/
-    theTitle: {
-      type: String,
-      default: window.sessionStorage.getItem("theTitle_key")
-    },
+    theTitleFromHome: ""
   },
   components: {PlayingVideoOptions, TheVideoPlayer},
   data() {
@@ -95,6 +89,14 @@ export default {
       myVideoPlayer: undefined,
       /*正在播放的视频链接*/
       thePlayingVideoUrl: "",
+      /*页面标题*/
+      theTitle: window.sessionStorage.getItem("theMyFollowListdata_key"),
+      /*切换列表数据*/
+      theMyFollowListdata: [],
+      /*特别关注的正在直播的主播的列表*/
+      myNewSpecFollowRes: [],
+      /*未特别关注但是正在直播的主播列表*/
+      notIsMySpecialFollow: [],
     }
   },
   methods: {
@@ -167,15 +169,125 @@ export default {
     window.onbeforeunload = function (e) {
       // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
       this.endListIndex = 10;
-      window.sessionStorage.setItem("theTitle_key", this.theTitle);
     };
+
+    /**
+     * 加载正在直播的特别关注的主播
+     */
+    this.$http.post(baseUrl + '/live/getNewMySpecialFollowFromTemp',
+      {},
+      {
+        emulateJSON: true
+      }).then(myNewSpecFollowRes => {
+      // console.log("myNewSpecFollowRes:", myNewSpecFollowRes);
+      if (myNewSpecFollowRes.status !== 200) {
+        this.$message({
+          showClose: true,
+          message: "出问题了，请联系网站管理员查找原因：" + myNewSpecFollowRes.status,
+          type: 'error',
+          duration: 10000,
+        });
+      } else if (myNewSpecFollowRes.body.success) {
+        // console.log("myNewSpecFollowRes",myNewSpecFollowRes.body.data.result);
+        // this.myNewSpecFollowRes = myNewSpecFollowRes.body.data.result;
+        this.myNewSpecFollowRes = myNewSpecFollowRes.body.data.result;
+        if (this.myNewSpecFollowRes.length !== 0) {
+          window.sessionStorage.setItem("myNewSpecFollowRes_key", JSON.stringify(this.myNewSpecFollowRes));
+        }
+        //提示框
+        this.$notify({
+          title: specialFollow,
+          message: '加载完成',
+          type: 'success'
+        });
+      } else {
+        this.$message({
+          showClose: true,
+          message: myNewSpecFollowRes.body.message,
+          type: 'error',
+          duration: 10000,
+        });
+      }
+    }).catch(function (myNewSpecFollowRes) {
+      //出错处理
+      console.log(myNewSpecFollowRes)
+    });
+
+    this.$http.post(baseUrl + '/live/getNotIsMySpecialFollow',
+      {},
+      {
+        emulateJSON: true
+      }).then(notIsMySpecialFollowRes => {
+      // console.log("notIsMySpecialFollowRes:", notIsMySpecialFollowRes);
+      if (notIsMySpecialFollowRes.status !== 200) {
+        this.$message({
+          showClose: true,
+          message: "出问题了，请联系网站管理员查找原因：" + notIsMySpecialFollowRes.status,
+          type: 'error',
+          duration: 10000,
+        });
+      } else if (notIsMySpecialFollowRes.body.success) {
+        // console.log("notIsMySpecialFollowRes", notIsMySpecialFollowRes.body.data.result);
+        this.notIsMySpecialFollow = notIsMySpecialFollowRes.body.data.result;
+        if (this.notIsMySpecialFollow.length !== 0) {
+          window.sessionStorage.setItem("notIsMySpecialFollow_key", JSON.stringify(this.notIsMySpecialFollow));
+        }
+        //提示框
+        this.$notify({
+          title: notSpecialFollow,
+          message: '正在直播的主播列表加载完成',
+          type: 'success'
+        });
+      } else {
+        this.$message({
+          showClose: true,
+          message: notIsMySpecialFollowRes.body.message,
+          type: 'error',
+          duration: 10000,
+        });
+      }
+    }).catch(function (myNewSpecFollowRes) {
+      //出错处理
+      console.log(myNewSpecFollowRes)
+    });
+
+    if (this.theTitle === notSpecialFollow) {
+      this.theMyFollowListdata = JSON.parse(window.sessionStorage.getItem("notIsMySpecialFollow_key"));
+    } else if (this.theTitle === specialFollow) {
+      this.theMyFollowListdata = JSON.parse(window.sessionStorage.getItem("myNewSpecFollowRes_key"));
+    }
   },
   destroyed() {
     window.removeEventListener("scroll", this.loading, true);
   },
   watch: {
-    theTitle(newValue){
-      this.theTitle = newValue;
+    theTitleFromHome: {
+      deep: true,
+      handler: function (newValue) {
+        this.theTitle = window.sessionStorage.getItem("theMyFollowListdata_key");
+        console.log("theTitle", this.theTitle);
+        if (this.theTitle === notSpecialFollow) {
+          this.theMyFollowListdata = JSON.parse(window.sessionStorage.getItem("notIsMySpecialFollow_key"));
+        } else if (this.theTitle === specialFollow) {
+          this.theMyFollowListdata = JSON.parse(window.sessionStorage.getItem("myNewSpecFollowRes_key"));
+        }
+      }
+    },
+    myNewSpecFollowRes: {
+      deep: true,
+      handler: function () {
+        if (this.theTitle === specialFollow) {
+          this.theMyFollowListdata = JSON.parse(window.sessionStorage.getItem("myNewSpecFollowRes_key"));
+        }
+      }
+    },
+    notIsMySpecialFollow: {
+      deep: true,
+      handler: function () {
+        if (this.theTitle === notSpecialFollow) {
+          this.theMyFollowListdata = JSON.parse(window.sessionStorage.getItem("notIsMySpecialFollow_key"));
+        }
+      }
     }
   }
 }

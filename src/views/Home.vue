@@ -35,8 +35,7 @@
             <div>
               <!--              <router-view :list="list" :myFavoriteList="myFavoriteList" :myFavoriteObject="myFavoriteObject"></router-view>-->
               <router-view :liveListAllData="list"
-                           :theMyFollowListdata="theMyFollowListdata"
-                           :theTitle="theTitle">
+                           :theTitleFromHome="theTitle">
               </router-view>
             </div>
           </el-main>
@@ -64,7 +63,7 @@ export default {
       /*切换列表数据*/
       theMyFollowListdata: [],
       /*MySpecialFollow页面的标题*/
-      theTitle: "特别关注",
+      theTitle: "",
     }
   },
   components: {
@@ -72,21 +71,16 @@ export default {
   },
   methods: {
     changeToNotIsMyfollow() {
-      this.theMyFollowListdata = this.notIsMySpecialFollow;
-      this.theTitle = "还未特别关注的主播";
-      console.log("theMyFollowListdata",this.theMyFollowListdata);
+      this.theTitle = notSpecialFollow;
+      window.sessionStorage.setItem("theMyFollowListdata_key",notSpecialFollow);
     },
     changeToMyfollow() {
-      this.theMyFollowListdata = this.myNewSpecFollowRes;
-      this.theTitle = "特别关注的主播";
-      console.log("theMyFollowListdata",this.theMyFollowListdata);
+      this.theTitle = specialFollow;
+      window.sessionStorage.setItem("theMyFollowListdata_key",specialFollow);
     },
   },
 
   mounted() {
-
-
-
     this.$http.post(baseUrl + '/ks/data',
       // baseUrl + '/ks/test/live-data',
       //参数部分，将会拼接在url后面
@@ -122,102 +116,9 @@ export default {
       //出错处理
       console.log(response)
     });
-    /**
-     * 加载正在直播的特别关注的主播
-     */
-    this.$http.post(baseUrl + '/live/getNewMySpecialFollowFromTemp',
-      {},
-      {
-        emulateJSON: true
-      }).then(myNewSpecFollowRes => {
-      // console.log("myNewSpecFollowRes:", myNewSpecFollowRes);
-      if (myNewSpecFollowRes.status !== 200) {
-        this.$message({
-          showClose: true,
-          message: "出问题了，请联系网站管理员查找原因：" + myNewSpecFollowRes.status,
-          type: 'error',
-          duration: 10000,
-        });
-      } else if (myNewSpecFollowRes.body.success) {
-        // console.log("myNewSpecFollowRes",myNewSpecFollowRes.body.data.result);
-        // this.myNewSpecFollowRes = myNewSpecFollowRes.body.data.result;
-        this.myNewSpecFollowRes = myNewSpecFollowRes.body.data.result;
-        if(this.myNewSpecFollowRes.length !== 0){
-          window.sessionStorage.setItem("myNewSpecFollowRes_key",JSON.stringify(this.myNewSpecFollowRes));
-        }
-        //提示框
-        this.$notify({
-          title: '特别关注',
-          message: '加载完成',
-          type: 'success'
-        });
-      } else {
-        this.$message({
-          showClose: true,
-          message: myNewSpecFollowRes.body.message,
-          type: 'error',
-          duration: 10000,
-        });
-      }
-    }).catch(function (myNewSpecFollowRes) {
-      //出错处理
-      console.log(myNewSpecFollowRes)
-    });
 
-    this.$http.post(baseUrl + '/live/getNotIsMySpecialFollow',
-      {},
-      {
-        emulateJSON: true
-      }).then(notIsMySpecialFollowRes => {
-      // console.log("notIsMySpecialFollowRes:", notIsMySpecialFollowRes);
-      if (notIsMySpecialFollowRes.status !== 200) {
-        this.$message({
-          showClose: true,
-          message: "出问题了，请联系网站管理员查找原因：" + notIsMySpecialFollowRes.status,
-          type: 'error',
-          duration: 10000,
-        });
-      } else if (notIsMySpecialFollowRes.body.success) {
-        console.log("notIsMySpecialFollowRes", notIsMySpecialFollowRes.body.data.result);
-        this.notIsMySpecialFollow = notIsMySpecialFollowRes.body.data.result;
-        if(this.notIsMySpecialFollow.length !== 0){
-          window.sessionStorage.setItem("notIsMySpecialFollow_key",JSON.stringify(this.notIsMySpecialFollow));
-        }
-        //提示框
-        this.$notify({
-          title: '不是特别关注',
-          message: '正在直播的主播列表加载完成',
-          type: 'success'
-        });
-      } else {
-        this.$message({
-          showClose: true,
-          message: notIsMySpecialFollowRes.body.message,
-          type: 'error',
-          duration: 10000,
-        });
-      }
-    }).catch(function (myNewSpecFollowRes) {
-      //出错处理
-      console.log(myNewSpecFollowRes)
-    });
   },
   watch:{
-    theMyFollowListdata:{
-      deep:true,
-      handler:function (newValue) {
-        console.log("aaa");
-        if (newValue.length === 0){
-          if (this.theTitle === '还未特别关注的主播') {
-            this.theMyFollowListdata = JSON.parse( window.sessionStorage.getItem("notIsMySpecialFollow_key"));
-            this.$options.methods.changeToNotIsMyfollow();
-          }else if (this.theTitle === '特别关注的主播'){
-            this.theMyFollowListdata = JSON.parse( window.sessionStorage.getItem("myNewSpecFollowRes_key"));
-            this.$options.methods.changeToMyfollow();
-          }
-        }
-      }
-    }
   },
 }
 </script>

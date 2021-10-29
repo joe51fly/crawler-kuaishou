@@ -62,7 +62,6 @@ export default {
       _pcursor: "",
       myFavoriteObjectData: Object,
       isShowHint: false,
-
     }
   },
   methods: {
