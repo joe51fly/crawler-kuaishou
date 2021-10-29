@@ -1,12 +1,12 @@
 <template>
   <div align="center">
-    <h2 style="color: hotpink">特别关注</h2>
-    <h3>当前直播人数:<span style="color: red">{{ mySpecialFollow.length }}</span></h3>
+    <h2 style="color: hotpink">{{ theTitle }}</h2>
+    <h3>当前直播人数:<span style="color: red">{{ theMyFollowListdata.length }}</span></h3>
     <br/>
     <div id="inputData">
       <br>
     </div>
-    <li :id="`liId+${index}`" v-for="(listData,index) in mySpecialFollow.slice(startListIndex, endListIndex)"
+    <li :id="`liId+${index}`" v-for="(listData,index) in theMyFollowListdata.slice(startListIndex, endListIndex)"
         style="display:inline-block;width: 327px"
         :key=index
         ref="name"
@@ -21,7 +21,7 @@
                       :myVideoPlayer="myVideoPlayer"
                       @setThePlayingVideoUrl="setThePlayingVideoUrl"
                       :liveListAllData="liveListAllData"
-                      :mySpecialFollowData="mySpecialFollow"
+                      :mySpecialFollowData="theMyFollowListdata"
                       ref="theVideoPlayer"
 
       />
@@ -55,7 +55,13 @@ export default {
     liveListAllData: [],
     myFavoriteList: [],
     myFavoriteObject: {},
-
+    /*切换列表数据*/
+    theMyFollowListdata: [],
+    /*页面标题*/
+    theTitle: {
+      type: String,
+      default: window.sessionStorage.getItem("theTitle_key")
+    },
   },
   components: {PlayingVideoOptions, TheVideoPlayer},
   data() {
@@ -143,11 +149,9 @@ export default {
 
     inputVideoBtn(event) {
       const inputVideoUrl = $('#inputVideoId').val();
-
       //被点击的btn
       const clkBtn = event.currentTarget;
       const videoDiv = $('videoDiv');
-
       $('#videoPlayer').show();/*!//视频窗口弹出*/
       console.log('videoPlayer:', $('#videoPlayer'));/*!//视频窗口弹出*/
       myPlayer = videojs("video");
@@ -157,91 +161,23 @@ export default {
     },
   },
   mounted() {
-    this.$http.post(baseUrl + '/live/getOldMySpecialFollowFromTemp',
-      {},
-      {
-        emulateJSON: true
-      }).then(mySpecFollowRes => {
-      console.log("mySpecFollowRes:", mySpecFollowRes);
-      // console.log(response.body.data.follow);
-      if (mySpecFollowRes.status !== 200) {
-        this.$message({
-          showClose: true,
-          message: "出问题了，请联系网站管理员查找原因：" + mySpecFollowRes.status,
-          type: 'error',
-          duration: 10000,
-        });
-      } else if (mySpecFollowRes.body.success) {
-        console.dir(mySpecFollowRes.body.data.result);
-        this.mySpecialFollow = mySpecFollowRes.body.data.result;
-      } else {
-        this.$message({
-          showClose: true,
-          message: mySpecFollowRes.body.message,
-          type: 'error',
-          duration: 10000,
-        });
-      }
-    }).catch(function (mySpecFollowRes) {
-      //出错处理
-      console.log(mySpecFollowRes)
-    });
-
-
-    this.$http.post(baseUrl + '/live/getNewMySpecialFollowFromTemp',
-      {},
-      {
-        emulateJSON: true
-      }).then(myNewSpecFollowRes => {
-      console.log("myNewSpecFollowRes:", myNewSpecFollowRes);
-      // console.log(response.body.data.follow);
-      if (myNewSpecFollowRes.status !== 200) {
-        this.$message({
-          showClose: true,
-          message: "出问题了，请联系网站管理员查找原因：" + myNewSpecFollowRes.status,
-          type: 'error',
-          duration: 10000,
-        });
-      } else if (myNewSpecFollowRes.body.success) {
-        console.dir(myNewSpecFollowRes.body.data.result);
-        this.mySpecialFollow = myNewSpecFollowRes.body.data.result;
-        //提示框
-        this.$notify({
-          title: '成功',
-          message: '加载完成',
-          type: 'success'
-        });
-      } else {
-        this.$message({
-          showClose: true,
-          message: myNewSpecFollowRes.body.message,
-          type: 'error',
-          duration: 10000,
-        });
-      }
-    }).catch(function (myNewSpecFollowRes) {
-      //出错处理
-      console.log(myNewSpecFollowRes)
-    });
-
-    //提示框
-    this.$notify.info({
-      title: '提示',
-      message: '后台正在加载新数据......'
-    });
-
-
     //监听页面滑动，执行this.loading函数
     window.addEventListener('scroll', this.loading, true);
     //页面刷新时重置this.endListIndex的值
     window.onbeforeunload = function (e) {
       // Chrome, Safari, Firefox 4+, Opera 12+ , IE 9+
       this.endListIndex = 10;
+      window.sessionStorage.setItem("theTitle_key", this.theTitle);
     };
   },
   destroyed() {
     window.removeEventListener("scroll", this.loading, true);
   },
+  watch: {
+    theTitle(newValue){
+      this.theTitle = newValue;
+    }
+  }
 }
 
 

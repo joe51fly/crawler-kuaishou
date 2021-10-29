@@ -60,10 +60,6 @@ export default {
   },
   data() {
     return {
-      //项目打包后图片加载不到 所以给前面加上/ks-vue/
-      // closeImgPath: '/static/pic/close.jpg',
-      // closeImgBuildPath: '/ks-vue/static/pic/close.jpg',
-      // closeImgPath,
       //这个属性好像没啥用
       isLoading: false,
       inputVideoUrl: '',

@@ -15,10 +15,10 @@
         <br/>
 
         <span v-if="showWhat === 'liveList'" style="font-size: 1.3rem">
-            {{ listData.user.user_name }}
+           {{ theVideoIndex }}、{{ listData.user.user_name }}
           </span>
         <span v-else-if="showWhat === 'mySpecialFollow'" style="font-size: 1.3rem">
-            {{ listData.userName }}
+            {{ theVideoIndex }}、{{ listData.userName }}
           </span>
 
         <!--
@@ -37,7 +37,7 @@
                               @click.native="addOrRemoveMyfavorite($event,theVideoIndex,false)">移除
             </el-dropdown-item>
             <el-dropdown-item
-              @click.native="setOrCancelIsTop($event,theVideoIndex,true)">置顶
+              @click.native="setOrCancelIsTop($event,theVideoIndex,true)">置顶:{{listData.isTop}}
             </el-dropdown-item>
             <el-dropdown-item
               @click.native="setOrCancelIsTop($event,theVideoIndex,false)">取消置顶
@@ -76,7 +76,7 @@ export default {
     myVideoPlayer: Object,
     liveListAllData: Array,
     showWhat: String,
-    mySpecialFollowData:Array
+    mySpecialFollowData: Array
   },
   data() {
     return {
@@ -182,10 +182,10 @@ export default {
 
     getIsMyfavoriteByEid(event, theVideoIndex) {
       let eid;
-      if (this.showWhat === 'liveList'){
+      if (this.showWhat === 'liveList') {
         console.log('liveListAllData-eid', this.liveListAllData[theVideoIndex].user.eid);
         eid = this.liveListAllData[theVideoIndex].user.eid;
-      }else if (this.showWhat === 'mySpecialFollow'){
+      } else if (this.showWhat === 'mySpecialFollow') {
         console.log('mySpecialFollowData-eid', this.mySpecialFollowData[theVideoIndex].userEid);
         eid = this.mySpecialFollowData[theVideoIndex].userEid;
       }
@@ -221,9 +221,9 @@ export default {
     },
     addOrRemoveMyfavorite(event, theVideoIndex, isMyfavorite) {
       let eid;
-      if (this.showWhat === 'liveList'){
+      if (this.showWhat === 'liveList') {
         eid = this.liveListAllData[theVideoIndex].user.eid;
-      }else if (this.showWhat === 'mySpecialFollow'){
+      } else if (this.showWhat === 'mySpecialFollow') {
         eid = this.mySpecialFollowData[theVideoIndex].userEid;
       }
       this.$http.post(baseUrl + '/live/updateMyfavLiveInfoByIsMyfavorite',
@@ -263,9 +263,9 @@ export default {
     /*设置置顶*/
     setOrCancelIsTop(event, theVideoIndex, isTop) {
       let eid;
-      if (this.showWhat === 'liveList'){
+      if (this.showWhat === 'liveList') {
         eid = this.liveListAllData[theVideoIndex].user.eid;
-      }else if (this.showWhat === 'mySpecialFollow'){
+      } else if (this.showWhat === 'mySpecialFollow') {
         eid = this.mySpecialFollowData[theVideoIndex].userEid;
       }
       this.$http.post(baseUrl + '/live/updateForTheTopByIsTop',
@@ -306,9 +306,9 @@ export default {
     setOrCancelTheSuperTop(event, theVideoIndex, isSuperTop) {
       // console.log(this.liveListAllData[theVideoIndex].user.eid);
       let eid;
-      if (this.showWhat === 'liveList'){
+      if (this.showWhat === 'liveList') {
         eid = this.liveListAllData[theVideoIndex].user.eid;
-      }else if (this.showWhat === 'mySpecialFollow'){
+      } else if (this.showWhat === 'mySpecialFollow') {
         eid = this.mySpecialFollowData[theVideoIndex].userEid;
       }
       this.$http.post(baseUrl + '/live/updateSuperSet_top',
