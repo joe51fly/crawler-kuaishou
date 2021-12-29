@@ -1,13 +1,18 @@
 package com.joe.kuaishou.tools;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.joe.kuaishou.bean.MyInfo;
 import com.joe.kuaishou.common.Result;
+import com.joe.kuaishou.service.MyInfoService;
+import com.joe.kuaishou.service.impl.MyInfoServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.naming.spi.ResolveResult;
 import java.io.*;
 import java.util.*;
 
@@ -291,9 +296,9 @@ public class KuaishouLiveKit {
                 Map.Entry entry = (Map.Entry) entryIterator.next();
                 Object key = entry.getKey();
                 Object value = entry.getValue();
-                if (StringUtils.isNotBlank((String)value)){
+                if (StringUtils.isNotBlank((String) value)) {
                     properties.setProperty((String) key, (String) value);
-                }else {
+                } else {
                     continue;
                 }
 //                System.out.println(key+":"+value);
@@ -535,9 +540,53 @@ public class KuaishouLiveKit {
         }
     }
 
-    public void myFavoriteCrawlerList() {
+    /**
+     * 关注或者取消关注 直接作用到快手账号
+     * # 关注  ftype：1
+     * # 取消关注  ftype：2
+     */
+    public Result focusInOrNot(String anchorEid,String myEid, int isFocusIn) {
+        KuaishouLiveKit kslk = new KuaishouLiveKit();
+        HashMap<String, String> ksProfileMap = kslk.readProperties(ksProfilePath);
+        String userAgent = ksProfileMap.get("userAgent");
+        String focusInUrl = ksProfileMap.get("focusInUrl");
+        String focusInCookie = ksProfileMap.get("focusInCookie");
+        String contentType = ksProfileMap.get("contentType");
+        String myLikePythonPath = ksProfileMap.get("myLikePythonPath");
+        String referer = "https://www.kuaishou.com/profile/" + myEid;
+        String focusInPayload = "{'operationName' : 'visionFollow', 'variables': {'touid': \'" + anchorEid + "\', 'ftype': " + isFocusIn + ", 'followSource': 1}, 'query': 'mutation visionFollow($touid: String, $ftype: Int, $followSource: Int, $expTag: String) {  visionFollow(touid: $touid, ftype: $ftype, followSource: $followSource, expTag: $expTag) {   result   followStatus   hostName    error_msg    __typename  }}'}";
+
+        String headers = "{'User-Agent': " + "\'" + userAgent + "\'" + ",'Cookie':" + "\'" + focusInCookie + "\'" + ",'Content-Type':" + "\'" + contentType + "\'" + ",'Referer':" + "\'" + referer + "\'}";
+        String s = kslk.KsCrawlerKit(headers, focusInPayload, focusInUrl, myLikePythonPath);
+
+        if (StringUtils.isNotBlank(s)){
+            JSONObject jsonObject = JSON.parseObject(s);
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONObject visionFollow = data.getJSONObject("visionFollow");
+            try {
+                int result = visionFollow.getIntValue("result");
+                int followStatus = visionFollow.getIntValue("followStatus");
+                if (result == 1){
+                    if (followStatus == 1) {
+                        logger.info("关注主播,操作成功！");
+                        return Result.ok().message("关注主播,操作成功！");
+                    } else {
+                        logger.info("取消关注主播,操作成功！");
+                        return Result.ok().message("取消关注主播,操作成功！");
+                    }
+                }else {
+                    logger.error("关注或者取消关注，操作失败！");
+                    return Result.error().message("关注或者取消关注，操作失败！");
+                }
+            }catch (NullPointerException e){
+                logger.error("关注或者取消关注操作失败。原因：关注的Cookie不正确，提示：关注的Cookie和短视频Cookie不一样，需要单独提取");
+                return Result.error().message("关注或者取消关注操作失败。原因：关注的Cookie不正确，提示：关注的Cookie和短视频Cookie不一样，需要单独提取");
+            }
+
+        }else {
+            logger.error("返回数据格式不正确！");
+            return Result.error().message("返回数据格式不正确！");
+        }
     }
-
-
 }
 

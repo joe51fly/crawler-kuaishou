@@ -38,9 +38,9 @@ public class LoginContraller {
      * }
      * @apiVersion 1.0.0
      */
-    @PostMapping("/login")
+    @PostMapping("/setCookies")
     @ResponseBody
-    public Result login(@RequestParam(name = "callback") String callback,@RequestParam(name = "liveCookie") String liveCookie, @RequestParam(name = "shortVideoCookie") String shortVideoCookie){
+    public Result setCookies(@RequestParam(name = "callback",required = false) String callback,@RequestParam(name = "liveCookie",required = false) String liveCookie, @RequestParam(name = "shortVideoCookie",required = false) String shortVideoCookie, @RequestParam(name = "focusInOrNotCookie",required = false) String focusInOrNotCookie){
 //        if (StringUtils.isBlank(shortVideoCookie) || StringUtils.isBlank(liveCookie)){
 //            logger.warn("短视频Cookie或直播Cookie不能为空");
 //            return Result.error().message("短视频Cookie或直播Cookie不能为空");
@@ -49,8 +49,10 @@ public class LoginContraller {
         HashMap<String, String> ksProfileMap = kslk.readProperties(ksProfilePath);
         String ksProfileLiveCookie = ksProfileMap.get("liveCookie");
         String ksProfileShortVideoCookie = ksProfileMap.get("shortVideoCookie");
+        String ksProfileFocusInCookie = ksProfileMap.get("focusInCookie");
         String _liveCookie = null;
         String _shortVideoCookie = null;
+        String _focusInCookie = null;
         if (StringUtils.isNotBlank(liveCookie)){
             _liveCookie = liveCookie;
         } else if(StringUtils.isNotBlank(ksProfileLiveCookie) && !ksProfileLiveCookie.equals("1")){
@@ -63,13 +65,20 @@ public class LoginContraller {
             _shortVideoCookie = ksProfileShortVideoCookie;
         }
 
+        if (StringUtils.isNotBlank(focusInOrNotCookie)){
+            _focusInCookie = focusInOrNotCookie;
+        }else if(StringUtils.isNotBlank(ksProfileFocusInCookie) && !ksProfileFocusInCookie.equals("1")){
+            _focusInCookie = ksProfileFocusInCookie;
+        }
+
         HashMap<String,String> dataMap = new HashMap<>();
         dataMap.put("liveCookie",_liveCookie);
         dataMap.put("shortVideoCookie",_shortVideoCookie);
+        dataMap.put("focusInCookie",_focusInCookie);
         String comment = "cookies";
         kslk.writeProperties(dataMap,ksProfilePath,comment);
 
-        return Result.ok().message("恭喜你设置Cookies成功");
+        return Result.ok().message("恭喜你,设置Cookies成功!");
     }
 
 }

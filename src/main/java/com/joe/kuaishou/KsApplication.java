@@ -14,10 +14,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableScheduling // 开启定时任务功能
 @MapperScan("com.joe.kuaishou.mapper") //扫描的mapper
 @SpringBootApplication
-public class KsApplication extends SpringBootServletInitializer{
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(KsApplication.class);
-    }
+public class KsApplication{
+//    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+//        return application.sources(KsApplication.class);
+//    }
     public static void main(String[] args) {
         SpringApplication.run(KsApplication.class, args);
     }

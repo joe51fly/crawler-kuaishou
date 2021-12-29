@@ -1,7 +1,7 @@
 import com.joe.kuaishou.KsApplication;
-import com.joe.kuaishou.bean.KsLiveMyfavorite;
-import com.joe.kuaishou.mapper.KsLiveMyfavoriteMapper;
-import com.joe.kuaishou.service.KsLiveMyfavoriteService;
+import com.joe.kuaishou.bean.Myfavorite;
+import com.joe.kuaishou.mapper.MyfavoriteMapper;
+import com.joe.kuaishou.service.MyfavoriteService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.List;
 //@SpringBootTest(classes = KsApplication.class)
 public class TestMybatis {
     @Autowired
-    private KsLiveMyfavoriteService ksLiveMyfavoriteService;
+    private MyfavoriteService myfavoriteService;
 //    @Test
 //    public void test(){
 //        //根据id查询

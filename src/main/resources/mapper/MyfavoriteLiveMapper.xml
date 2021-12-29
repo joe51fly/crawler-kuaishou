@@ -38,8 +38,8 @@
             (#{i.userName},#{i.userEid},#{i.userText},#{i.userId},#{i.userLiveStreamId},#{i.userHeadUrl},#{i.coverUrl},#{i.rtCoverUrl},#{i.hlsPlayUrl},#{i.playUrls},#{i.userKwaiId},#{i.userPrincipalId},#{i.isLive},#{i.liveStartTime},#{i.updateTime},#{i.isMyfavorite})
         </foreach>
         ON DUPLICATE KEY UPDATE
-        user_eid=VALUES(user_eid),
-        user_id=VALUES(user_id)
+        user_name=VALUES(user_name),
+        user_text=VALUES(user_text)
     </insert>
 
     <update id="updateMyfavoriteLiveInfoByEid">
@@ -159,7 +159,25 @@
                t.play_urls,
                t.update_time
         from myfavorite_live_info_temp as t
-                 INNER JOIN (select user_eid,is_top from myfavorite_live_info where is_myfavorite = true) as m
+                 INNER JOIN (select user_eid, is_top from myfavorite_live_info where is_myfavorite = true) as m
+                            on t.user_eid = m.user_eid
+        order by m.is_top desc
+    </select>
+    <select id="getNotIsMySpecialFollowInfo" resultType="myfavoriteLiveInfo">
+        select m.is_top,
+               t.user_name,
+               t.user_eid,
+               t.user_text,
+               t.user_id,
+               t.user_liveStream_id,
+               t.user_head_url,
+               t.cover_url,
+               t.rt_cover_url,
+               t.hls_play_url,
+               t.play_urls,
+               t.update_time
+        from myfavorite_live_info_temp as t
+                 INNER JOIN (select user_eid, is_top from myfavorite_live_info where is_myfavorite = false) as m
                             on t.user_eid = m.user_eid
         order by m.is_top desc
     </select>
@@ -204,8 +222,6 @@
         </set>
         where user_eid = #{userEid}
     </update>
-
-
 
 
 </mapper>

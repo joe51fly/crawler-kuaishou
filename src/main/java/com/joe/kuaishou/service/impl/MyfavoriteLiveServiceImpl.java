@@ -259,6 +259,22 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
     }
 
     @Override
+    public Result getNotIsMySpecialFollowInfo() {
+        Result result = insertMyfavoriteLiveInfoByList(false);
+        if (result.getSuccess()) {
+            logger.info(result.getMessage());
+            List<MyfavoriteLiveInfo> notIsMySpecialFollowInfo = myfavoriteLiveMapper.getNotIsMySpecialFollowInfo();
+            Map<String, Object> map = new HashMap<>();
+            map.put("result", notIsMySpecialFollowInfo);
+            logger.info("成功获取不是特别关注的正在直播的主播列表");
+            return Result.ok().data(map).message("成功获取不是特别关注正在直播的主播列表");
+        } else {
+            logger.info(result.getMessage());
+            return Result.error().message(result.getMessage());
+        }
+    }
+
+    @Override
     public List<MyfavoriteLiveInfo> getAllFromTemp() {
         return myfavoriteLiveMapper.getAllFromTemp();
     }

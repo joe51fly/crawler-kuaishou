@@ -117,6 +117,18 @@ public class MyfavoriteLiveContraller {
         }
     }
 
+    @PostMapping(value = "/getNotIsMySpecialFollow")
+    public Result getNotIsMySpecialFollow() {
+        Result notIsMySpecialFollowInfo = myfavoriteLiveService.getNotIsMySpecialFollowInfo();
+        if (notIsMySpecialFollowInfo.getSuccess()) {
+            logger.info("成功获取不是特别关注的正在直播的主播列表");
+            return Result.ok().data(notIsMySpecialFollowInfo.getData()).message(notIsMySpecialFollowInfo.getMessage());
+        } else {
+            logger.error("您还没有添加主播到特别关注");
+            return Result.error().message(notIsMySpecialFollowInfo.getMessage());
+        }
+    }
+
     /**
      * @apiDescription 获取临时表myfavorite_live_info_temp的全部数据
      * @api {POST} /getAllFromTemp 获取临时表的全部数据

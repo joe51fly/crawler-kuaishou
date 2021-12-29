@@ -137,4 +137,35 @@ public class MyfavoriteInfoContraller {
         }
     }
 
+    /**
+     * @apiDescription 关注或者取消关注 直接作用到快手账号
+     * @api {POST} /setFocusInOrNot
+     * @apiGroup MyfavoriteInfoContraller
+     * @apiName setFocusInOrNot
+     * @apiHeader {String} name=desc
+     * @apiParam {String} anchorEid 主播的eid
+     * @apiParam {int} isFocusIn 1:关注  2:取消关注
+     *
+     * @apiParamExample {json} 请求示例:
+     * {
+     * }
+     * @apiSuccessExample {json} 成功响应:
+     * {
+     *  "success": true,
+     *  "code": 20000,
+     *  "message": "String",
+     *  "data": {}
+     * }
+     * @apiVersion 1.0.0
+     */
+    @PostMapping(value = "/setFocusInOrNot")
+    public Result setFocusInOrNot(@RequestParam(name = "anchorEid") String anchorEid, @RequestParam(name = "isFocusIn") int isFocusIn) {
+        Result result = myfavoriteService.focusInOrNot(anchorEid, isFocusIn);
+        if (result.getSuccess()) {
+            return Result.ok().message(result.getMessage());
+        } else {
+            return Result.error().message(result.getMessage());
+        }
+    }
+
 }

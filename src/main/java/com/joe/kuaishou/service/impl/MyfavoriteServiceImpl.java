@@ -59,6 +59,7 @@ public class MyfavoriteServiceImpl implements MyfavoriteService {
 
     /**
      * list批量插入-我关注的主播的信息
+     *
      * @param myFollowCount
      * @return
      */
@@ -80,7 +81,7 @@ public class MyfavoriteServiceImpl implements MyfavoriteService {
         } else {
             n = myFollowCount / 30 + 1;
         }
-        logger.info("总共有 {} 条数据，需要循环的总次数：{}",myFollowCount,n);
+        logger.info("总共有 {} 条数据，需要循环的总次数：{}", myFollowCount, n);
         //根据我的关注数 循环执行上面的步骤
         for (int i = 0; i < n; i++) {
             long start = System.currentTimeMillis();
@@ -90,7 +91,7 @@ public class MyfavoriteServiceImpl implements MyfavoriteService {
             //遍历，取出数据并格式化想要的数据 多线程
             // 总数据条数
             int dataListSize = myFavoriteCrawlerList.size();
-            logger.info("myFavoriteCrawlerList一共有：{}条数据",myFavoriteCrawlerList.size());
+            logger.info("myFavoriteCrawlerList一共有：{}条数据", myFavoriteCrawlerList.size());
             // 线程数
             int threadNum = dataListSize / threadSize + 1;
             // 定义标记,过滤threadNum为整数
@@ -150,8 +151,8 @@ public class MyfavoriteServiceImpl implements MyfavoriteService {
                                     m[0] = m[0] + insertMyfavoriteCount / 2;
                                     logger.info("insertMyfavoriteByList成功插入：{}条数据", insertMyfavoriteCount / 2);
                                     logger.info("已经插入：{}条数据", m[0]);
-                                }else {
-                                    m[0] = m[0] + insertMyfavoriteCount ;
+                                } else {
+                                    m[0] = m[0] + insertMyfavoriteCount;
                                     logger.info("insertMyfavoriteByList成功插入：{}条数据", insertMyfavoriteCount);
                                     logger.info("已经插入：{}条数据", m[0]);
                                 }
@@ -173,14 +174,14 @@ public class MyfavoriteServiceImpl implements MyfavoriteService {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (results != null){
+            if (results != null) {
                 //关闭线程池 发现shutdown()执行后线程未关闭，故使用shutdownNow()
                 exec.shutdown();
 //                exec.shutdownNow();
                 logger.info("线程任务执行结束");
                 logger.info("执行任务消耗了 ：" + (System.currentTimeMillis() - start) + "毫秒");
 
-            }else{
+            } else {
                 logger.error("出错了。");
                 return 0;
             }
@@ -207,6 +208,7 @@ public class MyfavoriteServiceImpl implements MyfavoriteService {
 
     /**
      * 通过AnchorId 更新或插入主播数据
+     *
      * @param inputKsAnchorId
      * @return
      */
@@ -295,6 +297,7 @@ public class MyfavoriteServiceImpl implements MyfavoriteService {
 
     /**
      * 通过list批量更新主播数据
+     *
      * @return
      */
     public Result addMyfavoriteList() {
@@ -327,11 +330,12 @@ public class MyfavoriteServiceImpl implements MyfavoriteService {
 
     /**
      * 添加主播到特别关注
+     *
      * @param inputKsAnchorId
      * @param inputIsMyfavorite
      * @return
      */
-    public Result updateIsMyfavorite(String inputKsAnchorId,boolean inputIsMyfavorite) {
+    public Result updateIsMyfavorite(String inputKsAnchorId, boolean inputIsMyfavorite) {
         if (StringUtils.isBlank(inputKsAnchorId)) {
             logger.error("主播用户id不能为空");
             return Result.error().message("主播用户id不能为空");
@@ -348,6 +352,18 @@ public class MyfavoriteServiceImpl implements MyfavoriteService {
                 logger.error("添加主播到我的特别关注失败");
                 return Result.error().message("添加主播到我的特别关注失败");
             }
+        }
+    }
+
+    @Override
+    public Result focusInOrNot(String anchorEid, int isFocusIn) {
+        String myEid = myInfoService.getMyInfo().getMyEid();
+        KuaishouLiveKit ksKit = new KuaishouLiveKit();
+        Result result = ksKit.focusInOrNot(anchorEid, myEid, isFocusIn);
+        if (result.getSuccess()) {
+            return Result.ok().message(result.getMessage());
+        } else {
+            return Result.error().message(result.getMessage());
         }
     }
 }

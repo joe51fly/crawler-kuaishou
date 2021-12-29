@@ -51,8 +51,17 @@ public interface MyfavoriteLiveMapper {
     boolean createMyfavoriteLiveInfoTempTable();
 
     int insertMyfavoriteLiveInfoByListForTemp(List<MyfavoriteLiveInfo> myfavoriteLiveInfo);
-
+    /**
+     * 获取isMyfavorite为true的主播列表信息
+     * @return
+     */
     List<MyfavoriteLiveInfo> getMySpecialFollowInfo();
+
+    /**
+     * 获取isMyfavorite为false的主播列表信息
+     * @return
+     */
+    List<MyfavoriteLiveInfo> getNotIsMySpecialFollowInfo();
 
     List<MyfavoriteLiveInfo> getAllFromTemp();
     /**

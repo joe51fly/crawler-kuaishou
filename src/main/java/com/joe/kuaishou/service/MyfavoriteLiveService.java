@@ -56,6 +56,12 @@ public interface MyfavoriteLiveService {
      */
     Result getNewMySpecialFollowInfo();
 
+    /**
+     * 获取不是特别关注的正在直播的主播列表
+     * @return
+     */
+    Result getNotIsMySpecialFollowInfo();
+
     List<MyfavoriteLiveInfo> getAllFromTemp();
     /**
      * 清空临时表的数据

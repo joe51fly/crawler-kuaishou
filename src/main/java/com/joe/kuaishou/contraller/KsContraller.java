@@ -121,8 +121,8 @@ public class KsContraller {
         KuaishouLiveKit kslk = new KuaishouLiveKit();
         Result result = kslk.myfavoriteLiveAllData();
         if (result.getSuccess()) {
-            Thread thread = new Thread(new InsertMyfavoriteLiveInfoRunnable(),"InsertMyfavoriteLive");
-            thread.start();
+//            Thread thread = new Thread(new InsertMyfavoriteLiveInfoRunnable(),"InsertMyfavoriteLive");
+//            thread.start();
             return Result.ok().data(result.getData());
         } else {
             return Result.error().message(result.getMessage());

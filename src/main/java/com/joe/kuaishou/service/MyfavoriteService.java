@@ -64,4 +64,12 @@ public interface MyfavoriteService {
     Result addMyfavoriteList();
 
     Result updateIsMyfavorite(String inputKsAnchorId,boolean inputIsMyfavorite);
+
+    /**
+     * 关注或者取消关注主播 直接作用到快手账号
+     * @param anchorEid 主播的eid
+     * @param isFocusIn 关注 1  取消关注 2
+     * @return
+     */
+    Result focusInOrNot(String anchorEid,int isFocusIn);
 }
