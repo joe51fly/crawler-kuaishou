@@ -2,7 +2,6 @@ package com.joe.kuaishou.contraller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.joe.kuaishou.bean.MyInfo;
 import com.joe.kuaishou.common.Result;
 import com.joe.kuaishou.service.MyInfoService;
 import org.slf4j.Logger;

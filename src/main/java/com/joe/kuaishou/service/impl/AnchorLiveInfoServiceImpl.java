@@ -2,13 +2,15 @@ package com.joe.kuaishou.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.joe.kuaishou.bean.MyfavoriteLiveInfo;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.joe.kuaishou.bean.AnchorInfo;
+import com.joe.kuaishou.bean.AnchorLiveInfo;
 import com.joe.kuaishou.common.Result;
-import com.joe.kuaishou.mapper.MyfavoriteLiveMapper;
-import com.joe.kuaishou.service.MyfavoriteLiveService;
+import com.joe.kuaishou.mapper.AnchorInfoMapper;
+import com.joe.kuaishou.mapper.AnchorLiveInfoMapper;
+import com.joe.kuaishou.service.AnchorLiveInfoService;
 import com.joe.kuaishou.tools.KuaishouLiveKit;
 import com.joe.kuaishou.tools.NowDateUtils;
-import com.sun.org.apache.regexp.internal.RE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,32 +21,36 @@ import java.util.*;
 import java.util.concurrent.*;
 
 @Service
-public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
-    private static final Logger logger = LoggerFactory.getLogger(MyfavoriteLiveServiceImpl.class);
+public class AnchorLiveInfoServiceImpl extends ServiceImpl<AnchorLiveInfoMapper, AnchorLiveInfo> implements AnchorLiveInfoService {
+    private static final Logger logger = LoggerFactory.getLogger(AnchorLiveInfoServiceImpl.class);
 
     private static final boolean isLive = true;
 
     @Autowired
-    MyfavoriteLiveMapper myfavoriteLiveMapper;
+    AnchorLiveInfoMapper anchorLiveInfoMapper;
+
+    @Autowired
+    AnchorInfoMapper anchorInfoMapper;
+
 
     @Override
-    public MyfavoriteLiveInfo getMyfavoriteLiveInfoByEid(String userEid) {
-        return myfavoriteLiveMapper.getMyfavoriteLiveInfoByEid(userEid);
+    public AnchorLiveInfo getMyfavoriteLiveInfoByEid(String userEid) {
+        return anchorLiveInfoMapper.getMyfavoriteLiveInfoByEid(userEid);
     }
 
     @Override
-    public List<MyfavoriteLiveInfo> getAll() {
-        return myfavoriteLiveMapper.getAll();
+    public List<AnchorLiveInfo> getAll() {
+        return anchorLiveInfoMapper.getAll();
     }
 
     @Override
-    public List<MyfavoriteLiveInfo> getMyfavoriteLiveInfoByIsMyfavorite(boolean isMyfavorite) {
-        return myfavoriteLiveMapper.getMyfavoriteLiveInfoByIsMyfavorite(isMyfavorite);
+    public List<AnchorLiveInfo> getMyfavoriteLiveInfoByIsMyfavorite(boolean isMyfavorite) {
+        return anchorLiveInfoMapper.getMyfavoriteLiveInfoByIsMyfavorite(isMyfavorite);
     }
 
     @Override
-    public boolean insertMyfavoriteLiveInfo(MyfavoriteLiveInfo myfavoriteLiveInfo) {
-        return myfavoriteLiveMapper.insertMyfavoriteLiveInfo(myfavoriteLiveInfo);
+    public boolean insertMyfavoriteLiveInfo(AnchorLiveInfo anchorLiveInfo) {
+        return anchorLiveInfoMapper.insertMyfavoriteLiveInfo(anchorLiveInfo);
     }
 
     /**
@@ -102,50 +108,49 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
                     public Integer call() throws Exception {
                         logger.info(Thread.currentThread().getName() + "线程：" + listSub);
 
-                        List<MyfavoriteLiveInfo> listForInsert = new ArrayList<MyfavoriteLiveInfo>();
+                        List<AnchorLiveInfo> listForInsert = new ArrayList<AnchorLiveInfo>();
 
                         Iterator<Object> iterator = listSub.iterator();
                         while (iterator.hasNext()) {
                             Map next = (Map) iterator.next();
-                            MyfavoriteLiveInfo myfavoriteLiveInfo = new MyfavoriteLiveInfo();
+                            AnchorLiveInfo anchorLiveInfo = new AnchorLiveInfo();
                             try {
                                 String rtCoverUrl = (String) next.get("rtCoverUrl");
                                 String hlsPlayUrl = (String) next.get("hlsPlayUrl");
-                                String coverUrl = (String) next.get("coverUrl");
-                                String liveStreamId = (String) next.get("liveStreamId");
+//                                String coverUrl = (String) next.get("coverUrl");
+//                                String liveStreamId = (String) next.get("liveStreamId");
 //                                String startTime = (String) next.get("startTime");
                                 ArrayList playUrls = JSONObject.parseObject(String.valueOf(next.get("playUrls")), ArrayList.class);
                                 String o = String.valueOf(playUrls.get(0));
                                 String flvUrl = JSONObject.parseObject(o).getString("url");
                                 JSONObject user = JSONObject.parseObject(String.valueOf(next.get("user")));
                                 String eid = user.getString("eid");
-                                String user_name = user.getString("user_name");
+                                /*String user_name = user.getString("user_name");
                                 String headurl = user.getString("headurl");
                                 String principalId = user.getString("principalId");
                                 String user_id = user.getString("user_id");
-                                String user_text = user.getString("user_text");
+                                String user_text = user.getString("user_text");*/
 
 
-                                myfavoriteLiveInfo.setCoverUrl(coverUrl);
-                                myfavoriteLiveInfo.setHlsPlayUrl(hlsPlayUrl);
-
+                                //anchorLiveInfo.setCoverUrl(coverUrl);
+                                anchorLiveInfo.setHlsPlayUrl(hlsPlayUrl);
                                 //是否正在直播
-//                                myfavoriteLiveInfo.setLive(isLive);
-//                                myfavoriteLiveInfo.setLiveStartTime(new Date(Long.parseLong(startTime)));
-                                myfavoriteLiveInfo.setPlayUrls(flvUrl);
-                                myfavoriteLiveInfo.setRtCoverUrl(rtCoverUrl);
-                                myfavoriteLiveInfo.setUpdateTime(new Date());
-                                myfavoriteLiveInfo.setUserEid(eid);
-                                myfavoriteLiveInfo.setUserHeadUrl(headurl);
-                                myfavoriteLiveInfo.setUserId(user_id);
-                                myfavoriteLiveInfo.setUserLiveStreamId(liveStreamId);
-                                myfavoriteLiveInfo.setUserName(user_name);
-                                myfavoriteLiveInfo.setUserPrincipalId(principalId);
-                                myfavoriteLiveInfo.setUserText(user_text);
+//                                anchorLiveInfo.setLive(isLive);
+//                                anchorLiveInfo.setLiveStartTime(new Date(Long.parseLong(startTime)));
+                                anchorLiveInfo.setPlayUrls(flvUrl);
+                                anchorLiveInfo.setRtCoverUrl(rtCoverUrl);
+                                anchorLiveInfo.setUpdateTime(new Date());
+                                anchorLiveInfo.setUserEid(eid);
+/*                                anchorLiveInfo.setUserHeadUrl(headurl);
+                                anchorLiveInfo.setUserId(user_id);
+                                anchorLiveInfo.setUserLiveStreamId(liveStreamId);
+                                anchorLiveInfo.setUserName(user_name);
+                                anchorLiveInfo.setUserPrincipalId(principalId);
+                                anchorLiveInfo.setUserText(user_text);*/
                             } catch (Exception e) {
                                 logger.error("解析json出错，请检查json数据是否是真的", e);
                             }
-                            listForInsert.add(myfavoriteLiveInfo);
+                            listForInsert.add(anchorLiveInfo);
                         }
                         if (listForInsert.size() == 0) {
                             logger.error("配置文件里没有shortVideoCookie的值，请重新输入shortVideoCookie:{}", listForInsert);
@@ -155,7 +160,7 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
                             //入库 最后返回执行完list的总数
                             //这里 insertMyfavoriteCount 为受影响的的行数。实际的插入数量值应该是 insertMyfavoriteCount/2
                             if (isTemp) {
-                                insertMyfavoriteCount = myfavoriteLiveMapper.insertMyfavoriteLiveInfoByListForTemp(listForInsert);
+                                insertMyfavoriteCount = anchorLiveInfoMapper.insertMyfavoriteLiveInfoByListForTemp(listForInsert);
                                 if (insertMyfavoriteCount > 0) {
                                     //第一次插入的时候不用 除以2
                                     if (dbSize > 0) {
@@ -170,7 +175,7 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
                                     logger.error("insertMyfavoriteByList插入数据失败：{}条", insertMyfavoriteCount);
                                 }
                             } else {
-                                insertMyfavoriteCount = myfavoriteLiveMapper.insertMyfavoriteLiveInfoByList(listForInsert);
+                                insertMyfavoriteCount = anchorLiveInfoMapper.insertMyfavoriteLiveInfoByList(listForInsert);
                                 if (insertMyfavoriteCount > 0) {
                                     //第一次插入的时候不用 除以2
                                     if (dbSize > 0) {
@@ -206,10 +211,10 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
 //                exec.shutdownNow();
                 logger.info("线程任务执行结束");
                 logger.info("执行任务消耗了 ：" + (System.currentTimeMillis() - start) + "毫秒");
-                return Result.ok().message("批量插入 myfavoriteLiveInfo 成功");
+                return Result.ok().message("批量插入 anchorLiveInfo 成功");
             } else {
                 logger.error("出错了");
-                return Result.error().message("批量插入 myfavoriteLiveInfo 失败");
+                return Result.error().message("批量插入 anchorLiveInfo 失败");
             }
         } else {
             return result;
@@ -217,29 +222,29 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
     }
 
     @Override
-    public boolean updateMyfavoriteLiveInfoByEid(MyfavoriteLiveInfo myfavoriteLiveInfo) {
-        return myfavoriteLiveMapper.updateMyfavoriteLiveInfoByEid(myfavoriteLiveInfo);
+    public boolean updateMyfavoriteLiveInfoByEid(AnchorLiveInfo anchorLiveInfo) {
+        return anchorLiveInfoMapper.updateMyfavoriteLiveInfoByEid(anchorLiveInfo);
     }
 
     @Override
-    public boolean updateIsMyfavoriteLiveInfoByIsMyfavorite(MyfavoriteLiveInfo myfavoriteLiveInfo) {
-        return myfavoriteLiveMapper.updateIsMyfavoriteLiveInfoByIsMyfavorite(myfavoriteLiveInfo);
+    public boolean updateIsMyfavoriteLiveInfoByIsMyfavorite(AnchorLiveInfo anchorLiveInfo) {
+        return anchorLiveInfoMapper.updateIsMyfavoriteLiveInfoByIsMyfavorite(anchorLiveInfo);
     }
 
     @Override
     public boolean deleteMyfavoriteLiveInfoByEid(String userEid) {
-        return myfavoriteLiveMapper.deleteMyfavoriteLiveInfoByEid(userEid);
+        return anchorLiveInfoMapper.deleteMyfavoriteLiveInfoByEid(userEid);
     }
 
     @Override
-    public List<MyfavoriteLiveInfo> getMySpecialFollowInfo() {
-        return myfavoriteLiveMapper.getMySpecialFollowInfo();
+    public List<AnchorLiveInfo> getMySpecialFollowInfo() {
+        return anchorLiveInfoMapper.getMySpecialFollowInfo();
     }
 
     @Override
     public Result getNewMySpecialFollowInfo() {
         //插入数据之前先看临时表有没有上次存留的数据 如果有的话清除数据
-        List<MyfavoriteLiveInfo> allFromTemp = getAllFromTemp();
+        List<AnchorLiveInfo> allFromTemp = getAllFromTemp();
         if (allFromTemp.size() > 0) {
             truncateTemp();
             logger.info("清除临时表数据操作完成");
@@ -247,7 +252,7 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
         Result result = insertMyfavoriteLiveInfoByList(true);
         if (result.getSuccess()) {
             logger.info(result.getMessage());
-            List<MyfavoriteLiveInfo> myNewSpecialFollowInfo = getMySpecialFollowInfo();
+            List<AnchorLiveInfo> myNewSpecialFollowInfo = getMySpecialFollowInfo();
             Map<String, Object> map = new HashMap<>();
             map.put("result", myNewSpecialFollowInfo);
             logger.info("查询正在直播的特别关注的主播信息成功");
@@ -263,7 +268,7 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
         Result result = insertMyfavoriteLiveInfoByList(false);
         if (result.getSuccess()) {
             logger.info(result.getMessage());
-            List<MyfavoriteLiveInfo> notIsMySpecialFollowInfo = myfavoriteLiveMapper.getNotIsMySpecialFollowInfo();
+            List<AnchorLiveInfo> notIsMySpecialFollowInfo = anchorLiveInfoMapper.getNotIsMySpecialFollowInfo();
             Map<String, Object> map = new HashMap<>();
             map.put("result", notIsMySpecialFollowInfo);
             logger.info("成功获取不是特别关注的正在直播的主播列表");
@@ -275,20 +280,20 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
     }
 
     @Override
-    public List<MyfavoriteLiveInfo> getAllFromTemp() {
-        return myfavoriteLiveMapper.getAllFromTemp();
+    public List<AnchorLiveInfo> getAllFromTemp() {
+        return anchorLiveInfoMapper.getAllFromTemp();
     }
 
     @Override
     public void truncateTemp() {
-        myfavoriteLiveMapper.truncateTemp();
+        anchorLiveInfoMapper.truncateTemp();
     }
 
     @Override
     public Result updateForTheTopByIsTop(String userEid, boolean isSetTop) {
-        MyfavoriteLiveInfo myfavoriteLiveInfoByEid = getMyfavoriteLiveInfoByEid(userEid);
-        String userName = myfavoriteLiveInfoByEid.getUserName();
-        int top = myfavoriteLiveInfoByEid.getIsTop();
+        AnchorInfo anchorInfoByEid = anchorInfoMapper.getMyfavoriteByAnchorId(userEid);
+        String userName = anchorInfoByEid.getAnchorName();
+        int top = anchorInfoByEid.getIsTop();
         if (isSetTop) {
             if (top < 8) {
                 top += 1;
@@ -300,11 +305,11 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
                 top = 0;
             }
         }
-        MyfavoriteLiveInfo myfavoriteLiveInfo = new MyfavoriteLiveInfo();
-        myfavoriteLiveInfo.setUserEid(userEid);
-        myfavoriteLiveInfo.setIsTop(top);
-        myfavoriteLiveInfo.setUpdateTime(NowDateUtils.getDaDate());
-        boolean b = myfavoriteLiveMapper.updateForTheTopByIsTop(myfavoriteLiveInfo);
+        AnchorLiveInfo anchorLiveInfo = new AnchorLiveInfo();
+        anchorLiveInfo.setUserEid(userEid);
+        anchorLiveInfo.setIsTop(top);
+        anchorLiveInfo.setUpdateTime(NowDateUtils.getDaDate());
+        boolean b = anchorLiveInfoMapper.updateForTheTopByIsTop(anchorLiveInfo);
         Map<String, Object> map = new HashMap<>();
         map.put("userName", userName);
         if (b) {
@@ -318,21 +323,21 @@ public class MyfavoriteLiveServiceImpl implements MyfavoriteLiveService {
 
     @Override
     public Result updateSuperSet_top(String userEid, boolean isSetSuper_top) {
-        MyfavoriteLiveInfo myfavoriteLiveInfoByEid = getMyfavoriteLiveInfoByEid(userEid);
-        String userName = myfavoriteLiveInfoByEid.getUserName();
-        int top = myfavoriteLiveInfoByEid.getIsTop();
+        AnchorInfo anchorInfoByEid = anchorInfoMapper.getMyfavoriteByAnchorId(userEid);
+        String userName = anchorInfoByEid.getAnchorName();
+        int top = anchorInfoByEid.getIsTop();
         if (isSetSuper_top) {
             top = 9;
         } else {
             top = 0;
         }
-        MyfavoriteLiveInfo myfavoriteLiveInfo = new MyfavoriteLiveInfo();
-        myfavoriteLiveInfo.setUserEid(userEid);
-        myfavoriteLiveInfo.setIsTop(top);
-        myfavoriteLiveInfo.setUpdateTime(NowDateUtils.getDaDate());
+        AnchorLiveInfo anchorLiveInfo = new AnchorLiveInfo();
+        anchorLiveInfo.setUserEid(userEid);
+        anchorLiveInfo.setIsTop(top);
+        anchorLiveInfo.setUpdateTime(NowDateUtils.getDaDate());
         Map<String, Object> map = new HashMap<>();
         map.put("userName", userName);
-        boolean b = myfavoriteLiveMapper.updateSuperSet_top(myfavoriteLiveInfo);
+        boolean b = anchorLiveInfoMapper.updateSuperSet_top(anchorLiveInfo);
         if (b) {
             logger.info("设置或者取消 " + userName +" 超级置顶 成功！");
             return Result.ok().data(map).message("设置或者取消 超级置顶 成功！");

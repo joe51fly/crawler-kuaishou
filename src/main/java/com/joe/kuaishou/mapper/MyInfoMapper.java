@@ -1,10 +1,11 @@
 package com.joe.kuaishou.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.joe.kuaishou.bean.MyInfo;
 import org.springframework.stereotype.Component;
 
 @Component
-public interface MyInfoMapper {
+public interface MyInfoMapper extends BaseMapper<MyInfo> {
     /*
     插入用户信息
      */

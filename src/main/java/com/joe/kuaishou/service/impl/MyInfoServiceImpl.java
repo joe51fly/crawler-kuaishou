@@ -1,12 +1,11 @@
 package com.joe.kuaishou.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.joe.kuaishou.bean.MyInfo;
-import com.joe.kuaishou.common.Result;
 import com.joe.kuaishou.mapper.MyInfoMapper;
 import com.joe.kuaishou.service.MyInfoService;
 import com.joe.kuaishou.tools.KuaishouLiveKit;
-import jnr.ffi.annotations.In;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MyInfoServiceImpl implements MyInfoService {
+public class MyInfoServiceImpl extends ServiceImpl<MyInfoMapper, MyInfo> implements MyInfoService {
     private static final Logger logger = LoggerFactory.getLogger(MyInfoServiceImpl.class);
 
     @Autowired
@@ -55,8 +54,8 @@ public class MyInfoServiceImpl implements MyInfoService {
 
                     MyInfo myInfoUpdate = new MyInfo();
                     myInfoUpdate.setMyEid(eid);
-                    myInfoUpdate.setMyFans(Integer.valueOf(fan));
-                    myInfoUpdate.setMyFollow(Integer.valueOf(follow));
+                    myInfoUpdate.setMyFans(Long.valueOf(fan));
+                    myInfoUpdate.setMyFollow(Long.valueOf(follow));
 
                     boolean b = updateMyInfo(myInfoUpdate);
                     if (b) {

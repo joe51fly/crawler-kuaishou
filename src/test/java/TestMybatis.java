@@ -1,16 +1,6 @@
-import com.joe.kuaishou.KsApplication;
-import com.joe.kuaishou.bean.Myfavorite;
-import com.joe.kuaishou.mapper.MyfavoriteMapper;
 import com.joe.kuaishou.service.MyfavoriteService;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 //@RunWith(SpringRunner.class)
 ////加载主启动类
@@ -75,4 +65,11 @@ public class TestMybatis {
 //            System.out.println("删除数据成功");
 //        }
 //    }
+    @Test
+    public void test6(){
+
+
+
+        System.out.println(System.getProperty("user.dir"));
+    }
 }

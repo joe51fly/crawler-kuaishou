@@ -1,41 +1,49 @@
 package com.joe.kuaishou.service;
 
-import com.joe.kuaishou.bean.Myfavorite;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.joe.kuaishou.bean.AnchorInfo;
 import com.joe.kuaishou.common.Result;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-public interface MyfavoriteService {
+/**
+ * <p>
+ *  服务类
+ * </p>
+ *
+ * @author joe
+ * @since 2022-06-20
+ */
+public interface AnchorInfoService extends IService<AnchorInfo> {
     /*
         根据id查询
      */
-    Myfavorite getMyfavorite(Integer id);
+    AnchorInfo getMyfavorite(Integer id);
 
     /*
         根据用户id查询
      */
-    Myfavorite getMyfavoriteByAnchorId(String ksAnchorId);
+    AnchorInfo getMyfavoriteByAnchorId(String ksAnchorId);
 
     /*
         查询所有数据
      */
-    List<Myfavorite> getAll();
+    List<AnchorInfo> getAll();
 
     /*
   通过isMyfavorite的状态查询我特别关注的主播
    */
-    List<Myfavorite> getMyfavoriteByIsMyfavorite(boolean isMyfavorite);
+    List<AnchorInfo> getMyfavoriteByIsMyfavorite(boolean isMyfavorite);
 
     /*
         插入一条数据
      */
-    boolean insertMyfavorite(Myfavorite myfavorite);
+    boolean insertMyfavorite(AnchorInfo anchorInfo);
 
     /*
         根据id插入或者更新
      */
-//    boolean insertOrUpdateMyfavoriteById(Myfavorite Myfavorite);
+//    boolean insertOrUpdateMyfavoriteById(AnchorInfo anchorInfo);
 
     /*
         批量插入List<Myfavorite>
@@ -46,12 +54,12 @@ public interface MyfavoriteService {
     /*
        根据anchorId更新数据
     */
-    boolean updateMyfavoriteByAnchorId(Myfavorite myfavorite);
+    boolean updateMyfavoriteByAnchorId(AnchorInfo anchorInfo);
 
     /*
     更新主播状态为特别关注
     */
-    boolean updateIsMyfavoriteByAnchorId(Myfavorite myfavorite);
+    boolean updateIsMyfavoriteByAnchorId(AnchorInfo anchorInfo);
 
     /*
         根据anchorId删除数据

@@ -15,16 +15,18 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     #虚拟机
 #    url: jdbc:mysql://192.168.2.128:3306/crawler?characterEncoding=utf-8&useSSL=false&serverTimezone=CTT
-    url: jdbc:mysql://121.89.215.191:3306/crawler?characterEncoding=utf-8&useSSL=false&serverTimezone=CTT
+#    url: jdbc:mysql://121.89.215.191:3306/crawler?characterEncoding=utf-8&useSSL=false&serverTimezone=CTT
+#    url: jdbc:mysql://120.53.118.137:3306/crawler?characterEncoding=utf-8&useSSL=false&serverTimezone=CTT
     #阿里云
-#    url: jdbc:mysql://127.0.0.1:3306/crawler?characterEncoding=utf-8&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://127.0.0.1:3306/crawler?characterEncoding=utf-8&useSSL=false&serverTimezone=CTT
 
 
-mybatis:
+mybatis-plus:
   mapper-locations: classpath:mapper/*Mapper.xml
   type-aliases-package: com.joe.kuaishou.bean
   configuration:
     map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 #\u70ED\u90E8\u7F72devtools
 #\u8BBE\u7F6E\u5F00\u542F\u70ED\u90E8\u7F72

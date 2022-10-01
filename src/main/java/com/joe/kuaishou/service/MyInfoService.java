@@ -1,8 +1,9 @@
 package com.joe.kuaishou.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.joe.kuaishou.bean.MyInfo;
 
-public interface MyInfoService {
+public interface MyInfoService extends IService<MyInfo> {
     /*
     插入用户信息
      */

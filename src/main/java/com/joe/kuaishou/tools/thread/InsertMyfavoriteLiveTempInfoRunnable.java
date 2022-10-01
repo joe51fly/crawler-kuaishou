@@ -1,6 +1,5 @@
 package com.joe.kuaishou.tools.thread;
 
-import com.joe.kuaishou.bean.MyfavoriteLiveInfo;
 import com.joe.kuaishou.common.Result;
 import com.joe.kuaishou.config.BeanContext;
 import com.joe.kuaishou.service.MyfavoriteLiveService;

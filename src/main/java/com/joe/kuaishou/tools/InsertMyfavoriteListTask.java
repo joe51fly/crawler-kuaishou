@@ -1,6 +1,5 @@
 package com.joe.kuaishou.tools;
 
-import com.joe.kuaishou.bean.MyInfo;
 import com.joe.kuaishou.service.MyInfoService;
 import com.joe.kuaishou.service.MyfavoriteService;
 import org.slf4j.Logger;

@@ -1,33 +1,34 @@
 package com.joe.kuaishou.service;
 
-import com.joe.kuaishou.bean.MyfavoriteLiveInfo;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.joe.kuaishou.bean.AnchorLiveInfo;
 import com.joe.kuaishou.common.Result;
 
 import java.util.List;
 
-public interface MyfavoriteLiveService {
+public interface AnchorLiveInfoService extends IService<AnchorLiveInfo> {
     /*
         根据用户userEid查询一条数据
      */
-    MyfavoriteLiveInfo getMyfavoriteLiveInfoByEid(String userEid);
+    AnchorLiveInfo getMyfavoriteLiveInfoByEid(String userEid);
 
     /*
         查询所有数据
      */
-    List<MyfavoriteLiveInfo> getAll();
+    List<AnchorLiveInfo> getAll();
 
     /*
     通过isMyfavorite的状态查询我特别关注的主播
      */
-    List<MyfavoriteLiveInfo> getMyfavoriteLiveInfoByIsMyfavorite(boolean isMyfavorite);
+    List<AnchorLiveInfo> getMyfavoriteLiveInfoByIsMyfavorite(boolean isMyfavorite);
 
     /*
         插入一条数据
      */
-    boolean insertMyfavoriteLiveInfo(MyfavoriteLiveInfo myfavoriteLiveInfo);
+    boolean insertMyfavoriteLiveInfo(AnchorLiveInfo anchorLiveInfo);
 
     /*
-        批量插入List<MyfavoriteLiveInfo>
+        批量插入List<AnchorLiveInfo>
      */
     Result insertMyfavoriteLiveInfoByList(boolean isTemp);
 
@@ -35,12 +36,12 @@ public interface MyfavoriteLiveService {
     /*
        根据Eid更新数据
     */
-    boolean updateMyfavoriteLiveInfoByEid(MyfavoriteLiveInfo myfavoriteLiveInfo);
+    boolean updateMyfavoriteLiveInfoByEid(AnchorLiveInfo anchorLiveInfo);
 
     /*
     更新主播状态为特别关注或者取消特别关注
      */
-    boolean updateIsMyfavoriteLiveInfoByIsMyfavorite(MyfavoriteLiveInfo myfavoriteLiveInfo);
+    boolean updateIsMyfavoriteLiveInfoByIsMyfavorite(AnchorLiveInfo anchorLiveInfo);
 
     /*
         根据anchorId删除数据
@@ -49,7 +50,7 @@ public interface MyfavoriteLiveService {
 
 
 
-    List<MyfavoriteLiveInfo> getMySpecialFollowInfo();
+    List<AnchorLiveInfo> getMySpecialFollowInfo();
 
     /*
         获取新插入的正在直播的特别关注的主播信息
@@ -62,7 +63,7 @@ public interface MyfavoriteLiveService {
      */
     Result getNotIsMySpecialFollowInfo();
 
-    List<MyfavoriteLiveInfo> getAllFromTemp();
+    List<AnchorLiveInfo> getAllFromTemp();
     /**
      * 清空临时表的数据
      * @return
